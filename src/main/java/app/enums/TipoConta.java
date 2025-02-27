@@ -1,4 +1,4 @@
-package com.enums;
+package app.enums;
 
 
 public enum TipoConta {

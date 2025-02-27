@@ -1,7 +1,10 @@
-package com.entities;
+package app.entities;
 
-import com.enums.TipoCategoria;
+import java.time.LocalDateTime;
 
+import app.enums.StatusConta;
+import app.enums.TipoConta;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -19,28 +22,32 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "categorias")
+@Table(name = "contas")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Categoria {
+public class Conta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "usuario_id")
+    @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
     @NotBlank
-    private String nomeCategoria;
+    private String nomeConta;
 
     @Enumerated(EnumType.STRING)
-    private TipoCategoria tipo;
+    private TipoConta tipoConta;
 
-    private String icone;
+    private Double saldoInicial;
+    
+    @Column(name = "data_criacao", nullable = false, updatable = false)
+    private LocalDateTime dataCriacao = LocalDateTime.now();
+    
+    @Enumerated(EnumType.STRING)
+    private StatusConta status;
 }
-
-
