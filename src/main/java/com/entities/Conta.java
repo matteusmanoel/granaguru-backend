@@ -36,7 +36,7 @@ public class Conta {
 
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
-    private Usuario user;
+    private Usuario usuarioo;
 
     @NotBlank
     private String nomeConta;
