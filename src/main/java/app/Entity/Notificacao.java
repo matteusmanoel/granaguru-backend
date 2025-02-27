@@ -1,6 +1,8 @@
-package com.entities;
+package app.Entity;
 
-import com.enums.TipoCategoria;
+import java.time.LocalDateTime;
+
+import com.enums.TipoNotificacao;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -11,7 +13,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,28 +20,29 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "categorias")
+@Table(name = "notificacoes")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Categoria {
+public class Notificacao {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "usuario_id")
+    @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    @NotBlank
-    private String nomeCategoria;
+    private String titulo;
+
+    private String mensagem;
 
     @Enumerated(EnumType.STRING)
-    private TipoCategoria tipo;
+    private TipoNotificacao tipo;
 
-    private String icone;
+    private LocalDateTime dataEnvio;
+
+    private boolean lida;
 }
-
-

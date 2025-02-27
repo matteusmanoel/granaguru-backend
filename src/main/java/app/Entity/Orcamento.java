@@ -1,12 +1,9 @@
-package com.entities;
+package app.Entity;
 
 import java.time.LocalDateTime;
 
-import com.enums.Periodicidade;
-
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,13 +17,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "transacoes_recorrentes")
+@Table(name = "orcamentos")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TransacaoRecorrente {
+public class Orcamento {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,24 +33,14 @@ public class TransacaoRecorrente {
     private Usuario usuario;
 
     @ManyToOne
-    @JoinColumn(name = "conta_id", nullable = false)
-    private Conta conta;
-
-    @ManyToOne
-    @JoinColumn(name = "categoria_id", nullable = false)
+    @JoinColumn(name = "categoria_id")
     private Categoria categoria;
 
-    private Double valor;
+    private String periodo;
 
-    private String descricao;
+    private Double valorLimite;
 
-    @Enumerated(EnumType.STRING)
-    private Periodicidade periodicidade;
-
-    private LocalDateTime dataInicial;
-
-    private LocalDateTime dataFinal;
-
-    private LocalDateTime proximaExecucao;
+    @Column(name = "data_criacao", nullable = false, updatable = false)
+    private LocalDateTime dataCriacao = LocalDateTime.now();
 }
 

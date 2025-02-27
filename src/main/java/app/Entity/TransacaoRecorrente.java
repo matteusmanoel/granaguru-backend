@@ -1,11 +1,9 @@
-package com.entities;
+package app.Entity;
 
 import java.time.LocalDateTime;
 
-import com.enums.StatusConta;
-import com.enums.TipoConta;
+import com.enums.Periodicidade;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -15,7 +13,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,32 +20,40 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "contas")
+@Table(name = "transacoes_recorrentes")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Conta {
+public class TransacaoRecorrente {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
-    private Usuario usuarioo;
+    private Usuario usuario;
 
-    @NotBlank
-    private String nomeConta;
+    @ManyToOne
+    @JoinColumn(name = "conta_id", nullable = false)
+    private Conta conta;
+
+    @ManyToOne
+    @JoinColumn(name = "categoria_id", nullable = false)
+    private Categoria categoria;
+
+    private Double valor;
+
+    private String descricao;
 
     @Enumerated(EnumType.STRING)
-    private TipoConta tipoConta;
+    private Periodicidade periodicidade;
 
-    private Double saldoInicial;
-    
-    @Column(name = "data_criacao", nullable = false, updatable = false)
-    private LocalDateTime dataCriacao = LocalDateTime.now();
-    
-    @Enumerated(EnumType.STRING)
-    private StatusConta status;
+    private LocalDateTime dataInicial;
+
+    private LocalDateTime dataFinal;
+
+    private LocalDateTime proximaExecucao;
 }
+
