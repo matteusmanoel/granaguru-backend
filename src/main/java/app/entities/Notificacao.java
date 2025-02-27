@@ -1,9 +1,8 @@
-package app.Entity;
+package app.entities;
 
 import java.time.LocalDateTime;
 
-import com.enums.Periodicidade;
-
+import app.enums.TipoNotificacao;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -20,13 +19,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "transacoes_recorrentes")
+@Table(name = "notificacoes")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TransacaoRecorrente {
+public class Notificacao {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,25 +34,14 @@ public class TransacaoRecorrente {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    @ManyToOne
-    @JoinColumn(name = "conta_id", nullable = false)
-    private Conta conta;
+    private String titulo;
 
-    @ManyToOne
-    @JoinColumn(name = "categoria_id", nullable = false)
-    private Categoria categoria;
-
-    private Double valor;
-
-    private String descricao;
+    private String mensagem;
 
     @Enumerated(EnumType.STRING)
-    private Periodicidade periodicidade;
+    private TipoNotificacao tipo;
 
-    private LocalDateTime dataInicial;
+    private LocalDateTime dataEnvio;
 
-    private LocalDateTime dataFinal;
-
-    private LocalDateTime proximaExecucao;
+    private boolean lida;
 }
-

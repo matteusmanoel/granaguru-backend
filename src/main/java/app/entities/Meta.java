@@ -1,9 +1,8 @@
-package app.Entity;
+package app.entities;
 
 import java.time.LocalDateTime;
 
-import com.enums.StatusMeta;
-
+import app.enums.StatusMeta;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

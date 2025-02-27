@@ -1,10 +1,9 @@
-package app.Entity;
+package app.entities;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.enums.StatusUsuario;
-
+import app.enums.StatusUsuario;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
