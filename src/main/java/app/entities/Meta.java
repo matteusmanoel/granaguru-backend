@@ -3,20 +3,9 @@ package app.entities;
 import java.time.LocalDateTime;
 
 import app.enums.StatusMeta;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Table(name = "metas")
@@ -25,23 +14,38 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Meta {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    // Remove cascade. EAGER para carregar o usuario
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuario_id", nullable = false)
+    // Ignora todos os campos do usuario, exceto 'id'
+    @JsonIgnoreProperties({
+        "nome",
+        "email",
+        "senha",
+        "dataCriacao",
+        "status",
+        "metas", // evita loop
+        // se tiver "contas", "categorias", etc. também ignore
+        "contas",
+        "categorias",
+        "transacoes",
+        "orcamentos",
+        "notificacoes",
+        "transacoesRecorrentes"
+    })
     private Usuario usuario;
 
     private String descricao;
-
     private Double valorObjetivo;
-
     private Double valorAtual;
-
     private LocalDateTime dataInicio;
-
     private LocalDateTime dataTermino;
 
     @Enumerated(EnumType.STRING)
