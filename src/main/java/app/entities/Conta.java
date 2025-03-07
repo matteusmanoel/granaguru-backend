@@ -43,6 +43,7 @@ public class Conta {
     @Enumerated(EnumType.STRING)
     private TipoConta tipoConta;
 
+    @Column(nullable = false) // pra nao ficar nulo no banco 
     private Double saldoInicial;
     
     @Column(name = "data_criacao", nullable = false, updatable = false)

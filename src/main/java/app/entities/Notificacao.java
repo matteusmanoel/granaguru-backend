@@ -3,6 +3,7 @@ package app.entities;
 import java.time.LocalDateTime;
 
 import app.enums.TipoNotificacao;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -34,8 +35,10 @@ public class Notificacao {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
+    @Column(nullable = false) // pra nao ficar nulo no banco 
     private String titulo;
-
+    
+    @Column(nullable = false) // pra nao ficar nulo no banco 
     private String mensagem;
 
     @Enumerated(EnumType.STRING)
