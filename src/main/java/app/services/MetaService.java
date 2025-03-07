@@ -41,7 +41,6 @@ public class MetaService {
 
         Usuario usuarioCompleto = usuarioService.findById(meta.getUsuario().getId());
 
-        // Verifica duplicidade
         boolean existe = metaRepository.existsByDescricaoAndUsuario(meta.getDescricao(), usuarioCompleto);
         if (existe) {
             throw new RuntimeException("Já existe uma meta com essa descrição para este usuário.");
@@ -67,7 +66,6 @@ public class MetaService {
         if (metaAtualizada.getUsuario() != null && metaAtualizada.getUsuario().getId() != null) {
             Usuario usuarioCompleto = usuarioService.findById(metaAtualizada.getUsuario().getId());
 
-            // Se a descricao mudou, verifica duplicidade no novo usuario
             if (descricaoMudou) {
                 boolean existe = metaRepository.existsByDescricaoAndUsuario(metaAtualizada.getDescricao(), usuarioCompleto);
                 if (existe) {
