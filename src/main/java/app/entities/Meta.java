@@ -21,18 +21,15 @@ public class Meta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Remove cascade. EAGER para carregar o usuario
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuario_id", nullable = false)
-    // Ignora todos os campos do usuario, exceto 'id'
     @JsonIgnoreProperties({
         "nome",
         "email",
         "senha",
         "dataCriacao",
         "status",
-        "metas", // evita loop
-        // se tiver "contas", "categorias", etc. também ignore
+        "metas",
         "contas",
         "categorias",
         "transacoes",

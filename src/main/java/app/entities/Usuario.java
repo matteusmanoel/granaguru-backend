@@ -47,12 +47,8 @@ public class Usuario {
     @Enumerated(EnumType.STRING)
     private StatusUsuario status;
 
-    // Remove cascade e orphanRemoval
-    // Oculta a lista de metas quando listar usuários
     @OneToMany(mappedBy = "usuario")
     @JsonIgnore
     private List<Meta> metas;
 
-    // Se tiver outras listas (contas, categorias, etc.), remova cascade/orphanRemoval
-    // e aplique @JsonIgnore ou @JsonIgnoreProperties para evitar loop
 }
