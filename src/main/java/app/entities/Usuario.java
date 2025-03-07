@@ -4,24 +4,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import app.enums.StatusUsuario;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "usuarios")
@@ -30,7 +19,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Usuario{
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+public class Usuario {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -42,36 +33,26 @@ public class Usuario{
     @NotBlank
     @Email
     @Column(unique = true)
+    @Size(max = 255)
     private String email;
 
     @NotBlank
     @Size(min = 6)
     private String senha;
 
+    @Builder.Default
     @Column(name = "data_criacao", nullable = false, updatable = false)
     private LocalDateTime dataCriacao = LocalDateTime.now();
-    
+
     @Enumerated(EnumType.STRING)
     private StatusUsuario status;
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Conta> contas;
-    
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Categoria> categorias;
-    
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Transacao> transacoes;
-    
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Orcamento> orcamentos;
-    
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    // Remove cascade e orphanRemoval
+    // Oculta a lista de metas quando listar usuários
+    @OneToMany(mappedBy = "usuario")
+    @JsonIgnore
     private List<Meta> metas;
-    
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Notificacao> notificacoes;
-    
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TransacaoRecorrente> transacoesRecorrentes;
+
+    // Se tiver outras listas (contas, categorias, etc.), remova cascade/orphanRemoval
+    // e aplique @JsonIgnore ou @JsonIgnoreProperties para evitar loop
 }
