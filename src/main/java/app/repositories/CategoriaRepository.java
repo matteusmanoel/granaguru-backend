@@ -1,9 +1,8 @@
 package app.repositories;
 
-import app.entities.Categoria;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
+import app.entities.Categoria;
 import java.util.List;
 
 @Repository

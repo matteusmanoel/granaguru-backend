@@ -1,33 +1,47 @@
 package app.controllers;
 
-import java.util.List;
-
+import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+import java.util.Optional;
 import app.entities.Notificacao;
 import app.services.NotificacaoService;
-import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/notificacoes")
-@RequiredArgsConstructor
+@RequestMapping("/notificacoes")
 public class NotificacaoController {
 
-    private final NotificacaoService notificacaoService;
+    @Autowired
+    private NotificacaoService notificacaoService;
 
-    @GetMapping("/{usuarioId}")
-    public ResponseEntity<List<Notificacao>> buscarNotificacoes(@PathVariable Long usuarioId) {
-        return ResponseEntity.ok(notificacaoService.listarNotificacoesDoUsuario(usuarioId));
+    @GetMapping
+    public List<Notificacao> listarTodas() {
+        return notificacaoService.listarTodas();
+    }
+
+    @GetMapping("/usuario/{usuarioId}")
+    public List<Notificacao> listarPorUsuario(@PathVariable Long usuarioId) {
+        return notificacaoService.listarPorUsuario(usuarioId);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Notificacao> buscarPorId(@PathVariable Long id) {
+        Optional<Notificacao> notificacao = notificacaoService.buscarPorId(id);
+        return notificacao.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Notificacao> criarNotificacao(@RequestBody Notificacao notificacao) {
-        return ResponseEntity.ok(notificacaoService.criarNotificacao(notificacao));
+    public Notificacao salvar(@RequestBody Notificacao notificacao) {
+        return notificacaoService.salvar(notificacao);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluir(@PathVariable Long id) {
+        if (notificacaoService.buscarPorId(id).isPresent()) {
+            notificacaoService.excluir(id);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }

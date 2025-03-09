@@ -1,31 +1,28 @@
 package app.controllers;
 
-import app.entities.Orcamento;
-import app.services.OrcamentoService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Optional;
+import app.entities.Orcamento;
+import app.services.OrcamentoService;
 
 @RestController
 @RequestMapping("/orcamentos")
 public class OrcamentoController {
 
-    private final OrcamentoService orcamentoService;
-
-    public OrcamentoController(OrcamentoService orcamentoService) {
-        this.orcamentoService = orcamentoService;
-    }
+    @Autowired
+    private OrcamentoService orcamentoService;
 
     @GetMapping
-    public ResponseEntity<List<Orcamento>> listarTodos() {
-        return ResponseEntity.ok(orcamentoService.listarTodos());
+    public List<Orcamento> listarTodos() {
+        return orcamentoService.listarTodos();
     }
 
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<Orcamento>> listarPorUsuario(@PathVariable Long usuarioId) {
-        return ResponseEntity.ok(orcamentoService.listarPorUsuario(usuarioId));
+    public List<Orcamento> listarPorUsuario(@PathVariable Long usuarioId) {
+        return orcamentoService.listarPorUsuario(usuarioId);
     }
 
     @GetMapping("/{id}")
@@ -35,13 +32,16 @@ public class OrcamentoController {
     }
 
     @PostMapping
-    public ResponseEntity<Orcamento> criar(@RequestBody Orcamento orcamento) {
-        return ResponseEntity.ok(orcamentoService.salvar(orcamento));
+    public Orcamento salvar(@RequestBody Orcamento orcamento) {
+        return orcamentoService.salvar(orcamento);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        orcamentoService.excluir(id);
-        return ResponseEntity.noContent().build();
-    }
+        if (orcamentoService.buscarPorId(id).isPresent()) {
+            orcamentoService.excluir(id);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
 }

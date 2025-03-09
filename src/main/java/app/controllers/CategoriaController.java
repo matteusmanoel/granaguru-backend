@@ -1,31 +1,28 @@
 package app.controllers;
 
-import app.entities.Categoria;
-import app.services.CategoriaService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Optional;
+import app.entities.Categoria;
+import app.services.CategoriaService;
 
 @RestController
 @RequestMapping("/categorias")
 public class CategoriaController {
 
-    private final CategoriaService categoriaService;
-
-    public CategoriaController(CategoriaService categoriaService) {
-        this.categoriaService = categoriaService;
-    }
+    @Autowired
+    private CategoriaService categoriaService;
 
     @GetMapping
-    public ResponseEntity<List<Categoria>> listarTodas() {
-        return ResponseEntity.ok(categoriaService.listarTodas());
+    public List<Categoria> listarTodas() {
+        return categoriaService.listarTodas();
     }
 
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<Categoria>> listarPorUsuario(@PathVariable Long usuarioId) {
-        return ResponseEntity.ok(categoriaService.listarPorUsuario(usuarioId));
+    public List<Categoria> listarPorUsuario(@PathVariable Long usuarioId) {
+        return categoriaService.listarPorUsuario(usuarioId);
     }
 
     @GetMapping("/{id}")
@@ -35,13 +32,16 @@ public class CategoriaController {
     }
 
     @PostMapping
-    public ResponseEntity<Categoria> criar(@RequestBody Categoria categoria) {
-        return ResponseEntity.ok(categoriaService.salvar(categoria));
+    public Categoria salvar(@RequestBody Categoria categoria) {
+        return categoriaService.salvar(categoria);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        categoriaService.excluir(id);
-        return ResponseEntity.noContent().build();
-    }
+        if (categoriaService.buscarPorId(id).isPresent()) {
+            categoriaService.excluir(id);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
 }
