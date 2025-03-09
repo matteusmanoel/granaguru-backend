@@ -1,19 +1,17 @@
 package app.services;
 
-import app.entities.Orcamento;
-import app.repositories.OrcamentoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Optional;
+import app.entities.Orcamento;
+import app.repositories.OrcamentoRepository;
 
 @Service
 public class OrcamentoService {
 
-    private final OrcamentoRepository orcamentoRepository;
-
-    public OrcamentoService(OrcamentoRepository orcamentoRepository) {
-        this.orcamentoRepository = orcamentoRepository;
-    }
+    @Autowired
+    private OrcamentoRepository orcamentoRepository;
 
     public List<Orcamento> listarTodos() {
         return orcamentoRepository.findAll();
@@ -33,5 +31,5 @@ public class OrcamentoService {
 
     public void excluir(Long id) {
         orcamentoRepository.deleteById(id);
-    }
+    }
 }

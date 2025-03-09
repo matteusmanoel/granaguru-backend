@@ -1,23 +1,36 @@
+
 package app.services;
 
-import java.util.List;
 import org.springframework.stereotype.Service;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+import java.util.Optional;
 import app.entities.Conta;
 import app.repositories.ContaRepository;
-import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
 public class ContaService {
 
-    private final ContaRepository contaRepository;
+    @Autowired
+    private ContaRepository contaRepository;
 
-    public List<Conta> listarContasDoUsuario(Long usuarioId) {
+    public List<Conta> listarTodas() {
+        return contaRepository.findAll();
+    }
+
+    public List<Conta> listarPorUsuario(Long usuarioId) {
         return contaRepository.findByUsuarioId(usuarioId);
     }
 
-    public Conta criarConta(Conta conta) {
+    public Optional<Conta> buscarPorId(Long id) {
+        return contaRepository.findById(id);
+    }
+
+    public Conta salvar(Conta conta) {
         return contaRepository.save(conta);
+    }
+
+    public void excluir(Long id) {
+        contaRepository.deleteById(id);
     }
 }
