@@ -1,11 +1,14 @@
 package app.services;
 
-import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
-import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import app.entities.Notificacao;
+import app.exceptions.NotificacaoNotFoundException;
 import app.repositories.NotificacaoRepository;
+import app.repositories.UsuarioRepository;
 
 @Service
 public class NotificacaoService {
@@ -13,23 +16,50 @@ public class NotificacaoService {
     @Autowired
     private NotificacaoRepository notificacaoRepository;
 
-    public List<Notificacao> listarTodas() {
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    /**
+     * Retorna todas as notificações cadastradas.
+     */
+    public List<Notificacao> findAll() {
         return notificacaoRepository.findAll();
     }
 
-    public List<Notificacao> listarPorUsuario(Long usuarioId) {
+    /**
+     * Retorna as notificações de um usuário específico pelo ID do usuário.
+     */
+    public List<Notificacao> findByUsuarioId(Long usuarioId) {
+        if (!usuarioRepository.existsById(usuarioId)) {
+            throw new NotificacaoNotFoundException("Usuário não encontrado para o ID: " + usuarioId);
+        }
         return notificacaoRepository.findByUsuarioId(usuarioId);
     }
 
-    public Optional<Notificacao> buscarPorId(Long id) {
-        return notificacaoRepository.findById(id);
+    /**
+     * Busca uma notificação pelo ID.
+     * Lança exceção se não for encontrada.
+     */
+    public Notificacao findById(Long id) {
+        return notificacaoRepository.findById(id)
+                .orElseThrow(() -> new NotificacaoNotFoundException(id));
     }
 
-    public Notificacao salvar(Notificacao notificacao) {
+    /**
+     * Salva uma notificação no banco de dados.
+     */
+    public Notificacao save(Notificacao notificacao) {
         return notificacaoRepository.save(notificacao);
     }
 
-    public void excluir(Long id) {
+    /**
+     * Exclui uma notificação pelo ID.
+     * Lança exceção se não for encontrada.
+     */
+    public void deleteById(Long id) {
+        if (!notificacaoRepository.existsById(id)) {
+            throw new NotificacaoNotFoundException(id);
+        }
         notificacaoRepository.deleteById(id);
     }
 }

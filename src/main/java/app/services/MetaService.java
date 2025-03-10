@@ -1,98 +1,85 @@
 package app.services;
 
 import java.util.List;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-
 import app.entities.Meta;
 import app.entities.Usuario;
 import app.enums.StatusMeta;
+import app.exceptions.MetaNotFoundException;
 import app.repositories.MetaRepository;
+import app.repositories.UsuarioRepository;
 import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
 public class MetaService {
 
-    @Autowired
-    private MetaRepository metaRepository;
+	@Autowired
+	private MetaRepository metaRepository;
 
-    @Autowired
-    private UsuarioService usuarioService;
+	@Autowired
+	private UsuarioRepository usuarioRepository;
 
-    public List<Meta> listAll() {
-        return metaRepository.findAll();
-    }
+	/**
+	 * Retorna todas as metas cadastradas.
+	 */
+	public List<Meta> listAll() {
+		return metaRepository.findAll();
+	}
 
-    public Meta findById(Long id) {
-        Optional<Meta> metaOptional = metaRepository.findById(id);
-        if (metaOptional.isEmpty()) {
-            throw new RuntimeException("Meta não encontrada com o ID: " + id);
-        }
-        return metaOptional.get();
-    }
+	/**
+	 * Busca uma meta pelo ID. Lança exceção se não for encontrada.
+	 */
+	public Meta findById(Long id) {
+		return metaRepository.findById(id).orElseThrow(() -> new MetaNotFoundException(id));
+	}
 
-    public Meta create(Meta meta) {
-        if (meta.getUsuario() == null || meta.getUsuario().getId() == null) {
-            throw new RuntimeException("O usuário deve ser informado com um ID válido.");
-        }
+	/**
+	 * Salva uma meta no banco de dados, garantindo que o usuário existe.
+	 */
+	public Meta save(Meta meta) {
+		Usuario usuario = usuarioRepository.findById(meta.getUsuario().getId())
+				.orElseThrow(() -> new DataIntegrityViolationException("Usuário não encontrado."));
 
-        Usuario usuarioCompleto = usuarioService.findById(meta.getUsuario().getId());
+		if (metaRepository.existsByDescricaoAndUsuario(meta.getDescricao(), usuario)) {
+			throw new DataIntegrityViolationException("Já existe uma meta com essa descrição para este usuário.");
+		}
 
-        boolean existe = metaRepository.existsByDescricaoAndUsuario(meta.getDescricao(), usuarioCompleto);
-        if (existe) {
-            throw new RuntimeException("Já existe uma meta com essa descrição para este usuário.");
-        }
+		meta.setUsuario(usuario);
+		return metaRepository.save(meta);
+	}
 
-        meta.setUsuario(usuarioCompleto);
-        return metaRepository.save(meta);
-    }
+	/**
+	 * Atualiza uma meta existente pelo ID. Lança exceção se não for encontrada.
+	 */
+	public Meta update(Long id, Meta metaAtualizada) {
+		Meta metaExistente = findById(id);
 
-    public Meta update(Long id, Meta metaAtualizada) {
-        Meta metaExistente = findById(id);
+		if (metaAtualizada.getUsuario() != null && metaAtualizada.getUsuario().getId() != null) {
+			Usuario usuario = usuarioRepository.findById(metaAtualizada.getUsuario().getId())
+					.orElseThrow(() -> new DataIntegrityViolationException("Usuário não encontrado."));
+			metaExistente.setUsuario(usuario);
+		}
 
-        boolean descricaoMudou = metaAtualizada.getDescricao() != null
-                && !metaAtualizada.getDescricao().equals(metaExistente.getDescricao());
+		metaExistente.setDescricao(metaAtualizada.getDescricao());
+		metaExistente.setValorObjetivo(metaAtualizada.getValorObjetivo());
+		metaExistente.setValorAtual(metaAtualizada.getValorAtual());
+		metaExistente.setDataInicio(metaAtualizada.getDataInicio());
+		metaExistente.setDataTermino(metaAtualizada.getDataTermino());
+		metaExistente.setStatus(metaAtualizada.getStatus());
 
-        metaExistente.setDescricao(metaAtualizada.getDescricao());
-        metaExistente.setValorObjetivo(metaAtualizada.getValorObjetivo());
-        metaExistente.setValorAtual(metaAtualizada.getValorAtual());
-        metaExistente.setDataInicio(metaAtualizada.getDataInicio());
-        metaExistente.setDataTermino(metaAtualizada.getDataTermino());
-        metaExistente.setStatus(metaAtualizada.getStatus());
+		return metaRepository.save(metaExistente);
+	}
 
-        if (metaAtualizada.getUsuario() != null && metaAtualizada.getUsuario().getId() != null) {
-            Usuario usuarioCompleto = usuarioService.findById(metaAtualizada.getUsuario().getId());
-
-            if (descricaoMudou) {
-                boolean existe = metaRepository.existsByDescricaoAndUsuario(metaAtualizada.getDescricao(), usuarioCompleto);
-                if (existe) {
-                    throw new RuntimeException("Já existe uma meta com essa descrição para este usuário.");
-                }
-            }
-
-            metaExistente.setUsuario(usuarioCompleto);
-        }
-
-        return metaRepository.save(metaExistente);
-    }
-
-    public void delete(Long id) {
-        Meta meta = findById(id);
-        metaRepository.delete(meta);
-    }
-
-    public List<Meta> buscarPorDescricao(String descricao) {
-        return metaRepository.findByDescricaoContainingIgnoreCase(descricao);
-    }
-
-    public List<Meta> buscarPorStatus(StatusMeta status) {
-        return metaRepository.findByStatus(status);
-    }
-
-    public List<Meta> buscarConcluidas() {
-        return metaRepository.findConcluidas();
-    }
+	/**
+	 * Exclui uma meta pelo ID. Lança exceção se não for encontrada.
+	 */
+	public void deleteById(Long id) {
+		if (!metaRepository.existsById(id)) {
+			throw new MetaNotFoundException(id);
+		}
+		metaRepository.deleteById(id);
+	}
 }

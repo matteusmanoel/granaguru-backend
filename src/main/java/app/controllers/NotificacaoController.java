@@ -1,47 +1,97 @@
 package app.controllers;
 
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
-import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
-import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import app.entities.Notificacao;
+import app.exceptions.NotificacaoNotFoundException;
 import app.services.NotificacaoService;
 
 @RestController
 @RequestMapping("/notificacoes")
 public class NotificacaoController {
 
-    @Autowired
-    private NotificacaoService notificacaoService;
+	@Autowired
+	private NotificacaoService notificacaoService;
 
-    @GetMapping
-    public List<Notificacao> listarTodas() {
-        return notificacaoService.listarTodas();
-    }
+	/**
+	 * Retorna todas as notificações cadastradas.
+	 */
+	@GetMapping
+	public List<Notificacao> findAll() {
+		return notificacaoService.findAll();
+	}
 
-    @GetMapping("/usuario/{usuarioId}")
-    public List<Notificacao> listarPorUsuario(@PathVariable Long usuarioId) {
-        return notificacaoService.listarPorUsuario(usuarioId);
-    }
+	/**
+	 * Retorna as notificações de um usuário específico pelo ID do usuário.
+	 */
+	@GetMapping("/usuario/{usuarioId}")
+	public List<Notificacao> findByUsuarioId(@PathVariable Long usuarioId) {
+		return notificacaoService.findByUsuarioId(usuarioId);
+	}
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Notificacao> buscarPorId(@PathVariable Long id) {
-        Optional<Notificacao> notificacao = notificacaoService.buscarPorId(id);
-        return notificacao.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
+	/**
+	 * Busca uma notificação pelo ID. Retorna erro 404 caso não seja encontrada.
+	 */
+	@GetMapping("/{id}")
+	public ResponseEntity<Notificacao> findById(@PathVariable Long id) {
+		try {
+			return ResponseEntity.ok(notificacaoService.findById(id));
+		} catch (NotificacaoNotFoundException e) {
+			return ResponseEntity.notFound().build();
+		}
+	}
 
-    @PostMapping
-    public Notificacao salvar(@RequestBody Notificacao notificacao) {
-        return notificacaoService.salvar(notificacao);
-    }
+	/**
+	 * Cria uma nova notificação.
+	 */
+	@PostMapping
+	public ResponseEntity<?> save(@RequestBody Notificacao notificacao) {
+		try {
+			return ResponseEntity.ok(notificacaoService.save(notificacao));
+		} catch (DataIntegrityViolationException e) {
+			return ResponseEntity.badRequest().body("Erro ao salvar: " + e.getMessage());
+		}
+	}
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        if (notificacaoService.buscarPorId(id).isPresent()) {
-            notificacaoService.excluir(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
-    }
+	/**
+	 * Atualiza uma notificação existente pelo ID. Retorna erro 404 caso o ID não
+	 * exista.
+	 */
+	@PutMapping("/{id}")
+	public ResponseEntity<Notificacao> atualizar(@PathVariable Long id, @RequestBody Notificacao notificacao) {
+		try {
+			notificacaoService.findById(id);
+			notificacao.setId(id);
+			return ResponseEntity.ok(notificacaoService.save(notificacao));
+		} catch (NotificacaoNotFoundException e) {
+			return ResponseEntity.notFound().build();
+		} catch (DataIntegrityViolationException e) {
+			return ResponseEntity.badRequest().body(null);
+		}
+	}
+
+	/**
+	 * Exclui uma notificação pelo ID. Retorna erro 404 se não for encontrada.
+	 */
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> excluir(@PathVariable Long id) {
+		try {
+			notificacaoService.deleteById(id);
+			return ResponseEntity.noContent().build();
+		} catch (NotificacaoNotFoundException e) {
+			return ResponseEntity.notFound().build();
+		}
+	}
 }

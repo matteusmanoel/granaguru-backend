@@ -1,35 +1,62 @@
 package app.services;
 
-import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
-import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import app.entities.Orcamento;
+import app.exceptions.OrcamentoNotFoundException;
 import app.repositories.OrcamentoRepository;
+import app.repositories.UsuarioRepository;
 
 @Service
 public class OrcamentoService {
 
-    @Autowired
-    private OrcamentoRepository orcamentoRepository;
+	@Autowired
+	private OrcamentoRepository orcamentoRepository;
 
-    public List<Orcamento> listarTodos() {
-        return orcamentoRepository.findAll();
-    }
+	@Autowired
+	private UsuarioRepository usuarioRepository;
 
-    public List<Orcamento> listarPorUsuario(Long usuarioId) {
-        return orcamentoRepository.findByUsuarioId(usuarioId);
-    }
+	/**
+	 * Retorna todos os orçamentos cadastrados.
+	 */
+	public List<Orcamento> findAll() {
+		return orcamentoRepository.findAll();
+	}
 
-    public Optional<Orcamento> buscarPorId(Long id) {
-        return orcamentoRepository.findById(id);
-    }
+	/**
+	 * Retorna os orçamentos de um usuário específico pelo ID do usuário.
+	 */
+	public List<Orcamento> findByUsuarioId(Long usuarioId) {
+		if (!usuarioRepository.existsById(usuarioId)) {
+			throw new OrcamentoNotFoundException("Usuário não encontrado para o ID: " + usuarioId);
+		}
+		return orcamentoRepository.findByUsuarioId(usuarioId);
+	}
 
-    public Orcamento salvar(Orcamento orcamento) {
-        return orcamentoRepository.save(orcamento);
-    }
+	/**
+	 * Busca um orçamento pelo ID. Lança exceção se não for encontrado.
+	 */
+	public Orcamento findById(Long id) {
+		return orcamentoRepository.findById(id).orElseThrow(() -> new OrcamentoNotFoundException(id));
+	}
 
-    public void excluir(Long id) {
-        orcamentoRepository.deleteById(id);
-    }
+	/**
+	 * Salva um orçamento no banco de dados.
+	 */
+	public Orcamento save(Orcamento orcamento) {
+		return orcamentoRepository.save(orcamento);
+	}
+
+	/**
+	 * Exclui um orçamento pelo ID. Lança exceção se não for encontrado.
+	 */
+	public void deleteById(Long id) {
+		if (!orcamentoRepository.existsById(id)) {
+			throw new OrcamentoNotFoundException(id);
+		}
+		orcamentoRepository.deleteById(id);
+	}
 }
