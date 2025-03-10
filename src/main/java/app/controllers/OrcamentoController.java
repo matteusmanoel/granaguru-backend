@@ -1,47 +1,89 @@
+
 package app.controllers;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
-import java.util.Optional;
 import app.entities.Orcamento;
+import app.exceptions.OrcamentoNotFoundException;
 import app.services.OrcamentoService;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @RestController
 @RequestMapping("/orcamentos")
 public class OrcamentoController {
 
-    @Autowired
-    private OrcamentoService orcamentoService;
+	@Autowired
+	private OrcamentoService orcamentoService;
 
-    @GetMapping
-    public List<Orcamento> listarTodos() {
-        return orcamentoService.listarTodos();
-    }
+	/**
+	 * Retorna todos os orçamentos cadastrados.
+	 */
+	@GetMapping
+	public List<Orcamento> findAll() {
+		return orcamentoService.findAll();
+	}
 
-    @GetMapping("/usuario/{usuarioId}")
-    public List<Orcamento> listarPorUsuario(@PathVariable Long usuarioId) {
-        return orcamentoService.listarPorUsuario(usuarioId);
-    }
+	/**
+	 * Retorna os orçamentos de um usuário específico pelo ID do usuário.
+	 */
+	@GetMapping("/usuario/{usuarioId}")
+	public List<Orcamento> findByUsuarioId(@PathVariable Long usuarioId) {
+		return orcamentoService.findByUsuarioId(usuarioId);
+	}
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Orcamento> buscarPorId(@PathVariable Long id) {
-        Optional<Orcamento> orcamento = orcamentoService.buscarPorId(id);
-        return orcamento.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
+	/**
+	 * Busca um orçamento pelo ID. Retorna erro 404 caso não seja encontrado.
+	 */
+	@GetMapping("/{id}")
+	public ResponseEntity<Orcamento> buscarPorId(@PathVariable Long id) {
+		try {
+			return ResponseEntity.ok(orcamentoService.findById(id));
+		} catch (OrcamentoNotFoundException e) {
+			return ResponseEntity.notFound().build();
+		}
+	}
 
-    @PostMapping
-    public Orcamento salvar(@RequestBody Orcamento orcamento) {
-        return orcamentoService.salvar(orcamento);
-    }
+	/**
+	 * Cria um novo orçamento.
+	 */
+	@PostMapping
+	public ResponseEntity<?> save(@RequestBody Orcamento orcamento) {
+		try {
+			return ResponseEntity.ok(orcamentoService.save(orcamento));
+		} catch (DataIntegrityViolationException e) {
+			return ResponseEntity.badRequest().body("Erro ao salvar: " + e.getMessage());
+		}
+	}
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        if (orcamentoService.buscarPorId(id).isPresent()) {
-            orcamentoService.excluir(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
-    }
+	/**
+	 * Atualiza um orçamento existente pelo ID. Retorna erro 404 caso o ID não
+	 * exista.
+	 */
+	@PutMapping("/{id}")
+	public ResponseEntity<Orcamento> atualizar(@PathVariable Long id, @RequestBody Orcamento orcamento) {
+		try {
+			orcamentoService.findById(id);
+			orcamento.setId(id);
+			return ResponseEntity.ok(orcamentoService.save(orcamento));
+		} catch (OrcamentoNotFoundException e) {
+			return ResponseEntity.notFound().build();
+		} catch (DataIntegrityViolationException e) {
+			return ResponseEntity.badRequest().body(null);
+		}
+	}
+
+	/**
+	 * Exclui um orçamento pelo ID. Retorna erro 404 se não for encontrado.
+	 */
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> excluir(@PathVariable Long id) {
+		try {
+			orcamentoService.deleteById(id);
+			return ResponseEntity.noContent().build();
+		} catch (OrcamentoNotFoundException e) {
+			return ResponseEntity.notFound().build();
+		}
+	}
 }

@@ -1,42 +1,84 @@
+
 package app.controllers;
 
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
-import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import app.entities.TransacaoRecorrente;
+import app.exceptions.TransacaoRecorrenteNotFoundException;
 import app.services.TransacaoRecorrenteService;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @RestController
 @RequestMapping("/transacoes-recorrentes")
 public class TransacaoRecorrenteController {
 
-    @Autowired
-    private TransacaoRecorrenteService transacaoRecorrenteService;
+	@Autowired
+	private TransacaoRecorrenteService transacaoRecorrenteService;
 
-    @GetMapping
-    public List<TransacaoRecorrente> listarTodas() {
-        return transacaoRecorrenteService.listarTodas();
-    }
+	/**
+	 * Retorna todas as transações recorrentes cadastradas.
+	 */
+	@GetMapping
+	public List<TransacaoRecorrente> findAll() {
+		return transacaoRecorrenteService.findAll();
+	}
 
-    @GetMapping("/{id}")
-    public ResponseEntity<TransacaoRecorrente> buscarPorId(@PathVariable Long id) {
-        Optional<TransacaoRecorrente> transacaoRecorrente = transacaoRecorrenteService.buscarPorId(id);
-        return transacaoRecorrente.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
+	/**
+	 * Busca uma transação recorrente pelo ID. Retorna 404 se não for encontrada.
+	 */
+	@GetMapping("/{id}")
+	public ResponseEntity<TransacaoRecorrente> findById(@PathVariable Long id) {
+		try {
+			return ResponseEntity.ok(transacaoRecorrenteService.findById(id));
+		} catch (TransacaoRecorrenteNotFoundException e) {
+			return ResponseEntity.notFound().build();
+		}
+	}
 
-    @PostMapping
-    public TransacaoRecorrente salvar(@RequestBody TransacaoRecorrente transacaoRecorrente) {
-        return transacaoRecorrenteService.salvar(transacaoRecorrente);
-    }
+	/**
+	 * Cria uma nova transação recorrente. Retorna erro 400 caso algum dos IDs seja
+	 * inválido.
+	 */
+	@PostMapping
+	public ResponseEntity<?> save(@RequestBody TransacaoRecorrente transacaoRecorrente) {
+		try {
+			return ResponseEntity.ok(transacaoRecorrenteService.save(transacaoRecorrente));
+		} catch (DataIntegrityViolationException e) {
+			return ResponseEntity.badRequest().body("Erro ao salvar: " + e.getMessage());
+		}
+	}
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        if (transacaoRecorrenteService.buscarPorId(id).isPresent()) {
-            transacaoRecorrenteService.excluir(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
-    }
+	/**
+	 * Atualiza uma transação recorrente existente pelo ID. Retorna erro 404 caso o
+	 * ID não exista.
+	 */
+	@PutMapping("/{id}")
+	public ResponseEntity<TransacaoRecorrente> atualizar(@PathVariable Long id,
+			@RequestBody TransacaoRecorrente transacaoRecorrente) {
+		try {
+			transacaoRecorrenteService.findById(id);
+			transacaoRecorrente.setId(id);
+			return ResponseEntity.ok(transacaoRecorrenteService.save(transacaoRecorrente));
+		} catch (TransacaoRecorrenteNotFoundException e) {
+			return ResponseEntity.notFound().build();
+		} catch (DataIntegrityViolationException e) {
+			return ResponseEntity.badRequest().body(null);
+		}
+	}
+
+	/**
+	 * Exclui uma transação recorrente pelo ID. Retorna erro 404 se não for
+	 * encontrada.
+	 */
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+		try {
+			transacaoRecorrenteService.deleteById(id);
+			return ResponseEntity.noContent().build();
+		} catch (TransacaoRecorrenteNotFoundException e) {
+			return ResponseEntity.notFound().build();
+		}
+	}
 }

@@ -16,6 +16,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Usuario findByEmailIgnoreCase(String email);
 
     @Query("SELECT u FROM Usuario u WHERE u.status = :status")
-    List<Usuario> buscarPorStatus(StatusUsuario status);
+    List<Usuario> findByStatus(StatusUsuario status);
 
 }
