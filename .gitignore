@@ -1,20 +1,24 @@
-HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
+# Ignorar pastas de build e binários
+/bin/
+/target/
 !**/src/main/**/target/
 !**/src/test/**/target/
+/build/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-### STS ###
+# Ignorar arquivos específicos de IDEs (Eclipse, IntelliJ, NetBeans, VS Code)
+### Eclipse/STS ###
 .apt_generated
 .classpath
 .factorypath
 .project
-.settings
-.springBeans
-.sts4-cache
+.settings/
+.springBeans/
+.sts4-cache/
 
 ### IntelliJ IDEA ###
-.idea
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -25,9 +29,31 @@ target/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
 ### VS Code ###
 .vscode/
+
+# Ignorar Maven Wrapper exceto o necessário
+/.mvn/
+!/.mvn/wrapper/maven-wrapper.jar
+/.mvn/wrapper/
+mvnw
+mvnw.cmd
+
+# Ignorar logs e arquivos temporários
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Ignorar dependências baixadas localmente
+/.gradle/
+/.idea/
+/.cache/
+/.settings/
+
+# Ignorar configurações específicas do usuário
+*.swp
+*.swo
+*.bak
+*.backup
