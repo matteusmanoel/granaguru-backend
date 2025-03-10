@@ -1,3 +1,4 @@
+HELP.md
 # Ignorar pastas de build e binários
 /bin/
 /target/
