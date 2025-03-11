@@ -1,4 +1,3 @@
-
 package app.controllers;
 
 import java.util.List;
@@ -35,14 +34,6 @@ public class ContaController {
 	}
 
 	/**
-	 * Retorna as contas de um usuário específico pelo ID do usuário.
-	 */
-	@GetMapping("/usuario/{usuarioId}")
-	public List<Conta> findByUsuarioId(@PathVariable Long usuarioId) {
-		return contaService.findByUsuarioId(usuarioId);
-	}
-
-	/**
 	 * Busca uma conta pelo ID. Retorna erro 404 caso não seja encontrada.
 	 */
 	@GetMapping("/{id}")
@@ -52,6 +43,14 @@ public class ContaController {
 		} catch (ContaNotFoundException e) {
 			return ResponseEntity.notFound().build();
 		}
+	}
+
+	/**
+	 * Retorna as contas de um usuário específico pelo ID do usuário.
+	 */
+	@GetMapping("/usuario/{usuarioId}")
+	public List<Conta> findByUsuarioId(@PathVariable Long usuarioId) {
+		return contaService.findByUsuarioId(usuarioId);
 	}
 
 	/**

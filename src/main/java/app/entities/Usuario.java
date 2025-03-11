@@ -19,7 +19,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) //Diz ao Hibernate que ignore as propriedades de proxy, evitando erros de serialização (Objeto Java -> JSON)
 public class Usuario {
 
     @Id
