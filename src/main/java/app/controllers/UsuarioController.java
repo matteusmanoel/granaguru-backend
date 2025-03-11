@@ -67,6 +67,16 @@ public class UsuarioController {
 		return ResponseEntity.ok(usuarios);
 	}
 
+	@GetMapping("/buscar-por-email")
+	public ResponseEntity<Usuario> findByEmail(@RequestParam String email) {
+		try {
+			Usuario usuario = usuarioService.findByEmail(email);
+			return ResponseEntity.ok(usuario);
+		} catch (UsuarioNotFoundException e) {
+			return ResponseEntity.notFound().build();
+		}
+	}
+
 	@PostMapping
 	public ResponseEntity<?> save(@Valid @RequestBody Usuario usuario) {
 		try {
@@ -111,16 +121,16 @@ public class UsuarioController {
 		}
 	}
 
-	  @DeleteMapping("/{id}")
-	    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
-	        try {
-	            usuarioService.deleteById(id);
-	            return ResponseEntity.noContent().build();
-	        } catch (UsuarioNotFoundException e) {
-	            return ResponseEntity.notFound().build();
-	        } catch (Exception e) {
-	            return ResponseEntity.internalServerError().build();
-	        }
-	    }
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+		try {
+			usuarioService.deleteById(id);
+			return ResponseEntity.noContent().build();
+		} catch (UsuarioNotFoundException e) {
+			return ResponseEntity.notFound().build();
+		} catch (Exception e) {
+			return ResponseEntity.internalServerError().build();
+		}
+	}
 
 }

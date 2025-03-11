@@ -34,14 +34,6 @@ public class CategoriaController {
 	}
 
 	/**
-	 * Retorna as categorias de um usuário específico pelo ID do usuário.
-	 */
-	@GetMapping("/usuario/{usuarioId}")
-	public List<Categoria> findByUsuarioId(@PathVariable Long usuarioId) {
-		return categoriaService.findByUsuarioId(usuarioId);
-	}
-
-	/**
 	 * Busca uma categoria pelo ID. Retorna erro 404 caso não seja encontrada.
 	 */
 	@GetMapping("/{id}")
@@ -51,6 +43,14 @@ public class CategoriaController {
 		} catch (CategoriaNotFoundException e) {
 			return ResponseEntity.notFound().build();
 		}
+	}
+
+	/**
+	 * Retorna as categorias de um usuário específico pelo ID do usuário.
+	 */
+	@GetMapping("/usuario/{usuarioId}")
+	public List<Categoria> findByUsuarioId(@PathVariable Long usuarioId) {
+		return categoriaService.findByUsuarioId(usuarioId);
 	}
 
 	/**

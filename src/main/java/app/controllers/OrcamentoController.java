@@ -1,4 +1,3 @@
-
 package app.controllers;
 
 import org.springframework.web.bind.annotation.*;
@@ -26,23 +25,23 @@ public class OrcamentoController {
 	}
 
 	/**
-	 * Retorna os orçamentos de um usuário específico pelo ID do usuário.
-	 */
-	@GetMapping("/usuario/{usuarioId}")
-	public List<Orcamento> findByUsuarioId(@PathVariable Long usuarioId) {
-		return orcamentoService.findByUsuarioId(usuarioId);
-	}
-
-	/**
 	 * Busca um orçamento pelo ID. Retorna erro 404 caso não seja encontrado.
 	 */
 	@GetMapping("/{id}")
-	public ResponseEntity<Orcamento> buscarPorId(@PathVariable Long id) {
+	public ResponseEntity<Orcamento> findById(@PathVariable Long id) {
 		try {
 			return ResponseEntity.ok(orcamentoService.findById(id));
 		} catch (OrcamentoNotFoundException e) {
 			return ResponseEntity.notFound().build();
 		}
+	}
+
+	/**
+	 * Retorna os orçamentos de um usuário específico pelo ID do usuário.
+	 */
+	@GetMapping("/usuario/{usuarioId}")
+	public List<Orcamento> findByUsuarioId(@PathVariable Long usuarioId) {
+		return orcamentoService.findByUsuarioId(usuarioId);
 	}
 
 	/**
@@ -62,7 +61,7 @@ public class OrcamentoController {
 	 * exista.
 	 */
 	@PutMapping("/{id}")
-	public ResponseEntity<Orcamento> atualizar(@PathVariable Long id, @RequestBody Orcamento orcamento) {
+	public ResponseEntity<Orcamento> update(@PathVariable Long id, @RequestBody Orcamento orcamento) {
 		try {
 			orcamentoService.findById(id);
 			orcamento.setId(id);
@@ -78,7 +77,7 @@ public class OrcamentoController {
 	 * Exclui um orçamento pelo ID. Retorna erro 404 se não for encontrado.
 	 */
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> excluir(@PathVariable Long id) {
+	public ResponseEntity<Void> delete(@PathVariable Long id) {
 		try {
 			orcamentoService.deleteById(id);
 			return ResponseEntity.noContent().build();

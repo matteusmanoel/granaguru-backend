@@ -1,15 +1,18 @@
 package app.services;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.convert.Jsr310Converters.InstantToLocalDateTimeConverter;
 import org.springframework.stereotype.Service;
 
 import app.entities.Categoria;
 import app.entities.Conta;
 import app.entities.Transacao;
 import app.entities.Usuario;
+import app.enums.TipoTransacao;
 import app.exceptions.TransacaoNotFoundException;
 import app.repositories.CategoriaRepository;
 import app.repositories.ContaRepository;
@@ -48,6 +51,28 @@ public class TransacaoService {
     }
 
     /**
+     * Retorna transações associadas a uma conta específica.
+     */
+    public List<Transacao> findByContaId(Long contaId) {
+        return transacaoRepository.findByContaId(contaId);
+    }
+
+    /**
+     * Retorna transações associadas a uma categoria específica.
+     */
+    public List<Transacao> findByCategoriaId(Long categoriaId) {
+        return transacaoRepository.findByCategoriaId(categoriaId);
+    }
+
+    /**
+     * Retorna transações filtradas pelo usuário e pelo tipo (Receita ou Despesa).
+     */
+    public List<Transacao> findByUsuarioAndTipo(Long usuarioId, TipoTransacao tipo) {
+        return transacaoRepository.findByUsuarioAndTipo(usuarioId, tipo);
+    }
+    
+    
+    /**
      * Salva uma transação no banco, garantindo que
      * usuário, conta e categoria existam.
      */
@@ -58,6 +83,14 @@ public class TransacaoService {
                 .orElseThrow(() -> new DataIntegrityViolationException("Conta não encontrada."));
         Categoria categoria = categoriaRepository.findById(transacao.getCategoria().getId())
                 .orElseThrow(() -> new DataIntegrityViolationException("Categoria não encontrada."));
+        
+        if(transacao.getDataTransacao() == null) { //Caso dataTransacao venha null no JSON, define o momento atual
+        	transacao.setDataTransacao(LocalDateTime.now()); 
+        } 
+        
+        if(transacao.getTipo() == null) { // Caso tipo venha null no JSON, define como sendo saída
+        	transacao.setTipo(TipoTransacao.SAIDA); 
+        }
 
         transacao.setUsuario(usuario);
         transacao.setConta(conta);

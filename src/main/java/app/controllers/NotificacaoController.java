@@ -34,14 +34,6 @@ public class NotificacaoController {
 	}
 
 	/**
-	 * Retorna as notificações de um usuário específico pelo ID do usuário.
-	 */
-	@GetMapping("/usuario/{usuarioId}")
-	public List<Notificacao> findByUsuarioId(@PathVariable Long usuarioId) {
-		return notificacaoService.findByUsuarioId(usuarioId);
-	}
-
-	/**
 	 * Busca uma notificação pelo ID. Retorna erro 404 caso não seja encontrada.
 	 */
 	@GetMapping("/{id}")
@@ -51,6 +43,14 @@ public class NotificacaoController {
 		} catch (NotificacaoNotFoundException e) {
 			return ResponseEntity.notFound().build();
 		}
+	}
+
+	/**
+	 * Retorna as notificações de um usuário específico pelo ID do usuário.
+	 */
+	@GetMapping("/usuario/{usuarioId}")
+	public List<Notificacao> findByUsuarioId(@PathVariable Long usuarioId) {
+		return notificacaoService.findByUsuarioId(usuarioId);
 	}
 
 	/**
@@ -70,7 +70,7 @@ public class NotificacaoController {
 	 * exista.
 	 */
 	@PutMapping("/{id}")
-	public ResponseEntity<Notificacao> atualizar(@PathVariable Long id, @RequestBody Notificacao notificacao) {
+	public ResponseEntity<Notificacao> update(@PathVariable Long id, @RequestBody Notificacao notificacao) {
 		try {
 			notificacaoService.findById(id);
 			notificacao.setId(id);
@@ -86,7 +86,7 @@ public class NotificacaoController {
 	 * Exclui uma notificação pelo ID. Retorna erro 404 se não for encontrada.
 	 */
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> excluir(@PathVariable Long id) {
+	public ResponseEntity<Void> delete(@PathVariable Long id) {
 		try {
 			notificacaoService.deleteById(id);
 			return ResponseEntity.noContent().build();

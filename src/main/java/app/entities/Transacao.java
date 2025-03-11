@@ -25,7 +25,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class Transacao {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,14 +42,17 @@ public class Transacao {
 	@JoinColumn(name = "categoria_id", nullable = false)
 	private Categoria categoria;
 
+	@ManyToOne
+	@JoinColumn(name = "transacao_recorrente_id")
+	private TransacaoRecorrente transacaoRecorrente; // Conexão com a transação recorrente
+
 	private LocalDateTime dataTransacao;
+	private Double valor;
 
 	@Enumerated(EnumType.STRING)
 	private TipoTransacao tipo;
 
-	private Double valor;
-
 	private String descricao;
-
 	private String formaPagamento;
+	private Integer parcelaAtual;
 }

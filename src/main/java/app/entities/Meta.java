@@ -1,10 +1,11 @@
 package app.entities;
 
-import java.time.LocalDateTime;
-
+import java.time.LocalDate;
 import app.enums.StatusMeta;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 
 @Entity
@@ -14,37 +15,32 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Meta {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "usuario_id", nullable = false)
-    @JsonIgnoreProperties({
-        "nome",
-        "email",
-        "senha",
-        "dataCriacao",
-        "status",
-        "metas",
-        "contas",
-        "categorias",
-        "transacoes",
-        "orcamentos",
-        "notificacoes",
-        "transacoesRecorrentes"
-    })
-    private Usuario usuario;
+	@ManyToOne(fetch = FetchType.LAZY) // Permite ao Hibernate criar um proxy (objeto temporário) que carrega apenas o usuario_id.
+										// Melhora perfomance do banco, evitando carregamento desnecessário de dados, pois não
+										// precisa buscar todos os dados de usuario.
+	@JoinColumn(name = "usuario_id", nullable = false)
+	@JsonIgnore
+	private Usuario usuario;
 
-    private String descricao;
-    private Double valorObjetivo;
-    private Double valorAtual;
-    private LocalDateTime dataInicio;
-    private LocalDateTime dataTermino;
+	@NotNull(message = "A descrição da meta é obrigatória")
+	private String descricao;
 
-    @Enumerated(EnumType.STRING)
-    private StatusMeta status;
+	@NotNull(message = "O valor do objetivo é obrigatório")
+	@Positive(message = "O valor do objetivo deve ser maior que zero")
+	private Double valorObjetivo;
+
+	@Builder.Default
+	private Double valorAtual = 0.0;
+
+	private LocalDate dataInicio;
+	private LocalDate dataTermino;
+
+	@Enumerated(EnumType.STRING)
+	private StatusMeta status;
 }

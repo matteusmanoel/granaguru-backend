@@ -3,10 +3,13 @@ package app.services;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import app.entities.Categoria;
+import app.entities.Usuario;
 import app.exceptions.CategoriaNotFoundException;
+import app.exceptions.UsuarioNotFoundException;
 import app.repositories.CategoriaRepository;
 import app.repositories.UsuarioRepository;
 
@@ -46,9 +49,17 @@ public class CategoriaService {
 	/**
 	 * Salva uma categoria no banco de dados.
 	 */
-	public Categoria save(Categoria categoria) {
-		return categoriaRepository.save(categoria);
-	}
+	 public Categoria save(Categoria categoria) {
+	        if (categoria.getUsuario() == null || categoria.getUsuario().getId() == null) {
+	            throw new DataIntegrityViolationException("A categoria precisa estar associada a um usuário válido.");
+	        }
+
+	        Usuario usuario = usuarioRepository.findById(categoria.getUsuario().getId())
+	                .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado para o ID: " + categoria.getUsuario().getId()));
+
+	        categoria.setUsuario(usuario);
+	        return categoriaRepository.save(categoria);
+	    }
 
 	/**
 	 * Exclui uma categoria pelo ID. Lança exceção se não for encontrada.
