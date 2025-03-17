@@ -24,10 +24,8 @@ public class UsuarioService {
 	}
 
 	public Usuario findById(Long id) {
-		return usuarioRepository.findById(id).orElseThrow(() -> new UsuarioNotFoundException(id)); // Usa a
-																									// exceção
-																									// personalizada
-																									// (app.exceptions)
+		return usuarioRepository.findById(id)
+				.orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id));
 	}
 
 	public Usuario findByEmail(String email) {
@@ -56,7 +54,7 @@ public class UsuarioService {
 
 	public Usuario save(Usuario usuario) {
 		Usuario usuarioExistente = usuarioRepository.findByEmailIgnoreCase(usuario.getEmail());
-		if (usuarioExistente != null) {
+		if (usuarioExistente != null && !usuarioExistente.getId().equals(usuario.getId())) {
 			throw new DataIntegrityViolationException("Já existe um usuário cadastrado com este email.");
 		}
 
