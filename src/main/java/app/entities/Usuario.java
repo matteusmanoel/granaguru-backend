@@ -4,8 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import app.enums.StatusUsuario;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore; // para ignorar a relação, se necessário
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -19,7 +18,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) //Diz ao Hibernate que ignore as propriedades de proxy, evitando erros de serialização (Objeto Java -> JSON)
 public class Usuario {
 
     @Id
@@ -48,7 +46,6 @@ public class Usuario {
     private StatusUsuario status;
 
     @OneToMany(mappedBy = "usuario")
-    @JsonIgnore
+    @JsonIgnore  // Ignora a serialização dessa relação para evitar loops
     private List<Meta> metas;
-
 }
