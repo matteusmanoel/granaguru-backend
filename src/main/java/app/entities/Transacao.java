@@ -1,6 +1,7 @@
 package app.entities;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import app.enums.TipoTransacao;
 import jakarta.persistence.Entity;
@@ -10,6 +11,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
@@ -70,4 +73,13 @@ public class Transacao {
 	@ManyToOne
 	@JoinColumn(name = "transacao_recorrente_id")
 	private TransacaoRecorrente transacaoRecorrente;
+  
+   // NOVO: relacionamento Many-to-Many com Tag
+    @ManyToMany
+    @JoinTable(
+        name = "transacao_tag",  // Tabela intermediária
+        joinColumns = @JoinColumn(name = "transacao_id"),
+        inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private List<Tag> tags;
 }

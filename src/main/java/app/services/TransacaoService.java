@@ -1,6 +1,7 @@
 package app.services;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import app.entities.Categoria;
 import app.entities.Conta;
+import app.entities.Tag;
 import app.entities.Transacao;
 import app.entities.TransacaoRecorrente;
 import app.entities.Usuario;
@@ -18,12 +20,16 @@ import app.enums.TipoTransacao;
 import app.exceptions.TransacaoNotFoundException;
 import app.repositories.CategoriaRepository;
 import app.repositories.ContaRepository;
+import app.repositories.TagRepository;
 import app.repositories.TransacaoRecorrenteRepository;
 import app.repositories.TransacaoRepository;
 import app.repositories.UsuarioRepository;
+import jakarta.transaction.Transactional;
 
 @Service
+@Transactional
 public class TransacaoService {
+
 
 	@Autowired
 	private TransacaoRepository transacaoRepository;
@@ -42,6 +48,9 @@ public class TransacaoService {
 
 	@Autowired
 	private CategoriaRepository categoriaRepository;
+  
+  @Autowired
+    private TagRepository tagRepository;
 
 	/**
 	 * Retorna todas as transações cadastradas no banco. Gera registros na tabela
@@ -111,7 +120,6 @@ public class TransacaoService {
 	 * Salva uma transação no banco, garantindo que usuário, conta e categoria
 	 * existam.
 	 */
-	@Transactional
 	public Transacao save(Transacao transacao) {
 		if (transacao.getDataTransacao() == null) {
 			transacao.setDataTransacao(LocalDateTime.now());
@@ -135,6 +143,23 @@ public class TransacaoService {
 		transacao.setUsuario(usuario);
 		transacao.setConta(conta);
 		transacao.setCategoria(categoria);
+    
+    // Processa as tags, se houver
+        if (transacao.getTags() != null && !transacao.getTags().isEmpty()) {
+            List<Tag> tagsProcessadas = new ArrayList<>();
+            transacao.getTags().forEach(tag -> {
+                if (tag.getId() != null) {
+                    Tag tagCompleta = tagRepository.findById(tag.getId())
+                            .orElseThrow(() -> new DataIntegrityViolationException("Tag não encontrada com ID: " + tag.getId()));
+                    tagsProcessadas.add(tagCompleta);
+                } else {
+                    // Se desejar criar a tag nova caso não tenha id, você pode fazer:
+                    Tag novaTag = tagRepository.save(tag);
+                    tagsProcessadas.add(novaTag);
+                }
+            });
+            transacao.setTags(tagsProcessadas);
+        }
 
 		return transacaoRepository.save(transacao);
 	}
@@ -148,5 +173,4 @@ public class TransacaoService {
 		}
 		transacaoRepository.deleteById(id);
 	}
-
 }

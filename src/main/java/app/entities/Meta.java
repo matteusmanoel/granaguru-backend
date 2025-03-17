@@ -2,6 +2,7 @@ package app.entities;
 
 import java.time.LocalDate;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import app.enums.StatusMeta;
@@ -37,11 +38,12 @@ import lombok.Setter;
 @Builder
 public class Meta {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY) // Evita carregamento desnecessário de dados do usuário
+
+  @ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "usuario_id", nullable = false)
 	@NotNull(message = "O usuário da meta é obrigatório.")
 	@JsonIgnore

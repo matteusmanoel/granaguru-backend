@@ -3,9 +3,12 @@ package app.entities;
 import java.time.LocalDateTime;
 import java.util.List;
 
+
+import app.enums.StatusUsuario;
+import com.fasterxml.jackson.annotation.JsonIgnore; // para ignorar a relação, se necessário
+import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import app.enums.StatusUsuario;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,7 +37,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" }) // Evita erros de serialização (Hibernate -> JSON)
+
 public class Usuario {
 
 	@Id
