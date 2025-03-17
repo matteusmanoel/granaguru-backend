@@ -96,17 +96,13 @@ public class UsuarioController {
 			Usuario usuarioExistente = usuarioService.findById(id); // Verifica se o usuário existe
 
 			// Permitir atualização sem necessidade de mudar o e-mail
-			if (!usuarioExistente.getEmail().equalsIgnoreCase(usuario.getEmail())) { // Se o e-mail for o mesmo, não há
-																						// necessidade de fazer nenhuma
-																						// verificação
-				Usuario usuarioEmailExistente = usuarioService.findByEmail(usuario.getEmail()); // Se o e-mail foi
-																								// alterado, precisamos
-																								// garantir que ele não
-																								// pertence a outro
-																								// usuário, ou seja se a
-																								// variavel for !=
-																								// null).
-				if (usuarioEmailExistente != null) { // Se != então já existe um usuário com este e-mail.
+			if (!usuarioExistente.getEmail().equalsIgnoreCase(usuario.getEmail())) {
+				// Buscar o usuário pelo novo e-mail
+				Usuario usuarioEmailExistente = usuarioService.findByEmail(usuario.getEmail());
+
+				// Se encontrou outro usuário com esse e-mail e ele não for o mesmo que está
+				// sendo atualizado
+				if (usuarioEmailExistente != null && !usuarioEmailExistente.getId().equals(id)) {
 					throw new DataIntegrityViolationException("Já existe um usuário cadastrado com este email.");
 				}
 			}

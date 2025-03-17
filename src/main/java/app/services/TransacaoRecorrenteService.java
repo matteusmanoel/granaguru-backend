@@ -1,7 +1,7 @@
 package app.services;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +14,7 @@ import app.entities.Transacao;
 import app.entities.TransacaoRecorrente;
 import app.entities.Usuario;
 import app.enums.Periodicidade;
+import app.exceptions.TransacaoNotFoundException;
 import app.exceptions.TransacaoRecorrenteNotFoundException;
 import app.repositories.CategoriaRepository;
 import app.repositories.ContaRepository;
@@ -39,70 +40,26 @@ public class TransacaoRecorrenteService {
 	@Autowired
 	private CategoriaRepository categoriaRepository;
 
-	/**
-	 * Retorna todas as transações recorrentes cadastradas no banco.
-	 */
 	public List<TransacaoRecorrente> findAll() {
 		return transacaoRecorrenteRepository.findAll();
 	}
 
-	/**
-	 * Busca uma transação recorrente pelo ID. Lança exceção se não for encontrada.
-	 */
 	public TransacaoRecorrente findById(Long id) {
 		return transacaoRecorrenteRepository.findById(id)
 				.orElseThrow(() -> new TransacaoRecorrenteNotFoundException(id));
 	}
 
-	/**
-	 * Busca todas as transações recorrentes de uma conta específica.
-	 */
-	public List<TransacaoRecorrente> findByContaId(Long contaId) {
-		List<TransacaoRecorrente> transacoes = transacaoRecorrenteRepository.findByContaId(contaId);
-		if (transacoes.isEmpty()) {
-			throw new TransacaoRecorrenteNotFoundException(
-					"Nenhuma transação recorrente encontrada para a conta ID: " + contaId);
-		}
-		return transacoes;
-	}
-
-	/**
-	 * Busca todas as transações recorrentes com uma determinada periodicidade.
-	 */
-	public List<TransacaoRecorrente> findByPeriodicidade(Periodicidade periodicidade) {
-		List<TransacaoRecorrente> transacoes = transacaoRecorrenteRepository.findByPeriodicidade(periodicidade);
-		if (transacoes.isEmpty()) {
-			throw new TransacaoRecorrenteNotFoundException(
-					"Nenhuma transação recorrente encontrada para a periodicidade: " + periodicidade);
-		}
-		return transacoes;
-	}
-
-	/**
-	 * Busca todas as transações recorrentes de um usuário com determinada
-	 * periodicidade.
-	 */
-	public List<TransacaoRecorrente> findByUsuarioAndPeriodicidade(Long usuarioId, Periodicidade periodicidade) {
-		List<TransacaoRecorrente> transacoes = transacaoRecorrenteRepository.findByUsuarioAndPeriodicidade(usuarioId,
-				periodicidade);
-		if (transacoes.isEmpty()) {
-			throw new TransacaoRecorrenteNotFoundException("Nenhuma transação recorrente encontrada para o usuário ID: "
-					+ usuarioId + " e periodicidade: " + periodicidade);
-		}
-		return transacoes;
-	}
-
-	/**
-	 * Salva uma transação recorrente no banco, garantindo que usuário, conta e
-	 * categoria existam.
-	 */
 	public TransacaoRecorrente save(TransacaoRecorrente transacaoRecorrente) {
-		// Se dataInicial for null, atribuímos a data e hora atual
+
 		if (transacaoRecorrente.getDataInicial() == null) {
 			transacaoRecorrente.setDataInicial(LocalDateTime.now());
 		}
-		if (transacaoRecorrente.getTipo() == null) {
-			throw new DataIntegrityViolationException("O tipo da transação (ENTRADA ou SAIDA) deve ser informado.");
+
+		// Criar validação em caso de dataInicial já ter ocorrido (além de campo
+		// pago/não pago)
+		if (transacaoRecorrente.getProximaExecucao() == null) {
+			transacaoRecorrente.setProximaExecucao(calcularProximaExecucao(transacaoRecorrente.getDataInicial(),
+					transacaoRecorrente.getPeriodicidade()));
 		}
 
 		Usuario usuario = usuarioRepository.findById(transacaoRecorrente.getUsuario().getId())
@@ -116,45 +73,19 @@ public class TransacaoRecorrenteService {
 		transacaoRecorrente.setConta(conta);
 		transacaoRecorrente.setCategoria(categoria);
 
-		// É preciso salvar o registro para gerar um id em transacoes_recorrentes e
-		// assim vincular cada uma dass transações individuais a ele
+//		// 🔹 Se for um parcelamento fechado, verifica se todas as parcelas foram
+//		// geradas
+//		if (!recorrente.isDespesaFixa() && recorrente.getProximaExecucao().isAfter(recorrente.getDataFinal())) {
+//			transacaoRecorrenteRepository.delete(recorrente); // Remove da base após todas as parcelas serem criadas
+//																// (**Verificar se não é interesante manter o
+//																// registro**)
+//		} else {
+//			transacaoRecorrenteRepository.save(recorrente);
+//		}
+
 		TransacaoRecorrente savedRecorrente = transacaoRecorrenteRepository.save(transacaoRecorrente);
 
-		// Gerar parcelas
-		List<Transacao> parcelas = new ArrayList<>();
-		LocalDateTime dataExecucao = transacaoRecorrente.getDataInicial();
-
-		for (int i = 1; i <= transacaoRecorrente.getTotalParcelas(); i++) {
-			Transacao transacao = Transacao.builder().usuario(usuario).conta(conta).categoria(categoria)
-					.tipo(transacaoRecorrente.getTipo()) // Necessário validação - ENTRADA?, SAIDA?
-					.valor(transacaoRecorrente.getValor())
-					.descricao(transacaoRecorrente.getDescricao() + " - Parcela " + i + "/"
-							+ transacaoRecorrente.getTotalParcelas()) // Ex.: "Curso Online - Parcela 1/3 "
-					.dataTransacao(dataExecucao) // Necessário valor padrão para dataInicial (descricao)
-													// (i)/(totalParcelas)
-					.parcelaAtual(i).transacaoRecorrente(savedRecorrente) // Ligação com a transação recorrente
-					.build();
-
-			parcelas.add(transacao);
-
-			// Atualizar a próxima data de execução conforme a periodicidade
-			switch (transacaoRecorrente.getPeriodicidade()) {
-			case MENSAL:
-				dataExecucao = dataExecucao.plusMonths(1);
-				break;
-			case SEMANAL:
-				dataExecucao = dataExecucao.plusWeeks(1);
-				break;
-			case DIARIA:
-				dataExecucao = dataExecucao.plusDays(1);
-				break;
-			default:
-				throw new IllegalArgumentException("Periodicidade inválida.");
-			}
-		}
-
-		// Salvar todas as parcelas no banco
-		transacaoRepository.saveAll(parcelas);
+		processarTransacoesRecorrentes(savedRecorrente);
 
 		return savedRecorrente;
 	}
@@ -164,8 +95,124 @@ public class TransacaoRecorrenteService {
 	 */
 	public void deleteById(Long id) {
 		if (!transacaoRecorrenteRepository.existsById(id)) {
-			throw new TransacaoRecorrenteNotFoundException(id);
+			throw new TransacaoNotFoundException(id);
 		}
 		transacaoRecorrenteRepository.deleteById(id);
 	}
+
+	public void processarTransacoesRecorrentes(TransacaoRecorrente recorrente) {
+
+		LocalDateTime agora = LocalDateTime.now();
+
+		// 🔹 Se a próxima execução for nula, define a data inicial como próxima
+		// execução
+		if (recorrente.getProximaExecucao() == null) {
+			recorrente.setProximaExecucao(recorrente.getDataInicial());
+		}
+
+		// 🔹 Se a transação já deveria ter ocorrido, calcula as ocorrências pendentes
+		if (recorrente.getProximaExecucao().isBefore(agora)) {
+			LocalDateTime dataExecucao = recorrente.getProximaExecucao();
+			int ocorrencias = 0;
+
+			// 🔹 Loop para gerar todas as transações que ficaram pendentes
+			while (!dataExecucao.isAfter(agora)) {
+				if (!transacaoRepository.existsByTransacaoRecorrenteAndDataTransacao(recorrente, dataExecucao)) {
+					criarTransacaoRecorrente(recorrente, dataExecucao); // 🔹 Cria a transação para a data específica
+					ocorrencias++;
+				}
+				dataExecucao = calcularProximaExecucao(dataExecucao, recorrente.getPeriodicidade());
+			}
+
+			// 🔹 Atualiza a próxima data de execução
+			recorrente.setProximaExecucao(dataExecucao);
+
+			// 🔹 Salva a recorrência atualizada no banco
+			transacaoRecorrenteRepository.save(recorrente);
+
+			System.out.println(
+					"⚡ Processadas " + ocorrencias + " transações pendentes para " + recorrente.getDescricao());
+		}
+	}
+
+	/**
+	 * Calcula a próxima data de execução de uma transação recorrente com base na
+	 * periodicidade.
+	 */
+	private LocalDateTime calcularProximaExecucao(LocalDateTime dataAtual, Periodicidade periodicidade) {
+		switch (periodicidade) {
+		case DIARIA:
+			return dataAtual.plusDays(1);
+		case SEMANAL:
+			return dataAtual.plusWeeks(1);
+		case MENSAL:
+			return dataAtual.plusMonths(1);
+		case ANUAL:
+			return dataAtual.plusYears(1);
+		default:
+			throw new IllegalArgumentException("Periodicidade inválida: " + periodicidade);
+		}
+	}
+
+	private void criarTransacaoRecorrente(TransacaoRecorrente recorrente, LocalDateTime dataExecucao) {
+		// 🔹 Verifica se a transação já foi gerada para essa data para evitar
+		// duplicação
+		if (transacaoRepository.existsByTransacaoRecorrenteAndDataTransacao(recorrente, dataExecucao)) {
+			return; // Se já existe uma transação para essa data, não cria outra
+		}
+
+		// 🔹 Calcula o número da parcela atual
+		Integer parcelaAtual = calcularParcelaAtual(recorrente, dataExecucao);
+
+		// 🔹 Define a descrição correta para despesas fixas ou parcelamentos fechados
+		String descricao = recorrente.isDespesaFixa() ? recorrente.getDescricao() // Se for despesa fixa, mantém a
+																					// descrição original
+				: recorrente.getDescricao() + " - Parcela " + parcelaAtual + "/" + recorrente.getTotalParcelas();
+
+		// 🔹 Criação da transação com os dados da recorrência
+		Transacao transacao = Transacao.builder().usuario(recorrente.getUsuario()).conta(recorrente.getConta())
+				.categoria(recorrente.getCategoria()).tipo(recorrente.getTipo()).valor(recorrente.getValor())
+				.descricao(descricao) // Usa a descrição correta com ou sem parcela
+				.parcelaAtual(parcelaAtual).dataTransacao(dataExecucao) // Usa a data correta de execução
+				.transacaoRecorrente(recorrente) // Mantém a referência à recorrente
+				.build();
+
+		// 🔹 Salva a transação gerada
+		transacaoRepository.save(transacao);
+	}
+
+	/**
+	 * Calcula qual é a parcela atual de uma transação recorrente com base no número
+	 * de transações já geradas.
+	 */
+	private int calcularParcelaAtual(TransacaoRecorrente recorrente, LocalDateTime dataExecucao) {
+	    // Verifica se a transação recorrente tem uma data inicial válida
+	    if (recorrente.getDataInicial() == null) {
+	        throw new IllegalArgumentException("A transação recorrente precisa ter uma data inicial definida.");
+	    }
+
+	    // Calcula a diferença de tempo entre a data inicial e a data da transação que será gerada
+	    long diferenca = 0;
+
+	    switch (recorrente.getPeriodicidade()) {
+	        case DIARIA:
+	            diferenca = ChronoUnit.DAYS.between(recorrente.getDataInicial(), dataExecucao);
+	            break;
+	        case SEMANAL:
+	            diferenca = ChronoUnit.WEEKS.between(recorrente.getDataInicial(), dataExecucao);
+	            break;
+	        case MENSAL:
+	            diferenca = ChronoUnit.MONTHS.between(recorrente.getDataInicial(), dataExecucao);
+	            break;
+	        case ANUAL:
+	            diferenca = ChronoUnit.YEARS.between(recorrente.getDataInicial(), dataExecucao);
+	            break;
+	        default:
+	            throw new IllegalArgumentException("Periodicidade desconhecida: " + recorrente.getPeriodicidade());
+	    }
+
+	    return (int) diferenca + 1; // Retorna a parcela correta, considerando a primeira como 1
+	}
+
+
 }

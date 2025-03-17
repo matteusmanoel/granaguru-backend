@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import app.entities.TransacaoRecorrente;
-import app.enums.Periodicidade;
 import app.exceptions.TransacaoRecorrenteNotFoundException;
 import app.services.TransacaoRecorrenteService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/transacoes-recorrentes")
@@ -47,49 +47,11 @@ public class TransacaoRecorrenteController {
 	}
 
 	/**
-	 * Retorna todas as transações recorrentes de uma conta específica.
-	 */
-	@GetMapping("/conta/{contaId}")
-	public ResponseEntity<List<TransacaoRecorrente>> findByContaId(@PathVariable Long contaId) {
-		try {
-			return ResponseEntity.ok(transacaoRecorrenteService.findByContaId(contaId));
-		} catch (TransacaoRecorrenteNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		}
-	}
-
-	/**
-	 * Retorna todas as transações recorrentes com determinada periodicidade.
-	 */
-	@GetMapping("/periodicidade/{periodicidade}")
-	public ResponseEntity<List<TransacaoRecorrente>> findByPeriodicidade(@PathVariable Periodicidade periodicidade) {
-		try {
-			return ResponseEntity.ok(transacaoRecorrenteService.findByPeriodicidade(periodicidade));
-		} catch (TransacaoRecorrenteNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		}
-	}
-
-	/**
-	 * Retorna todas as transações recorrentes de um usuário por periodicidade.
-	 */
-	@GetMapping("/usuario/{usuarioId}/periodicidade/{periodicidade}")
-	public ResponseEntity<List<TransacaoRecorrente>> findByUsuarioAndPeriodicidade(@PathVariable Long usuarioId,
-			@PathVariable Periodicidade periodicidade) {
-		try {
-			return ResponseEntity
-					.ok(transacaoRecorrenteService.findByUsuarioAndPeriodicidade(usuarioId, periodicidade));
-		} catch (TransacaoRecorrenteNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		}
-	}
-
-	/**
 	 * Cria uma nova transação recorrente. Retorna erro 400 caso algum dos IDs seja
 	 * inválido.
 	 */
 	@PostMapping
-	public ResponseEntity<?> save(@RequestBody TransacaoRecorrente transacaoRecorrente) {
+	public ResponseEntity<?> save(@Valid @RequestBody TransacaoRecorrente transacaoRecorrente) {
 		try {
 			return ResponseEntity.ok(transacaoRecorrenteService.save(transacaoRecorrente));
 		} catch (DataIntegrityViolationException e) {

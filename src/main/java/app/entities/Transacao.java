@@ -15,6 +15,9 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,37 +33,48 @@ import lombok.Setter;
 @Builder
 public class Transacao {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "usuario_id", nullable = false)
-    private Usuario usuario;
+	@ManyToOne
+	@JoinColumn(name = "usuario_id", nullable = false)
+	@NotNull(message = "O usuário é obrigatório.")
+	private Usuario usuario;
 
-    @ManyToOne
-    @JoinColumn(name = "conta_id", nullable = false)
-    private Conta conta;
+	@ManyToOne
+	@JoinColumn(name = "conta_id", nullable = false)
+	@NotNull(message = "A conta é obrigatória.")
+	private Conta conta;
 
-    @ManyToOne
-    @JoinColumn(name = "categoria_id", nullable = false)
-    private Categoria categoria;
+	@ManyToOne
+	@JoinColumn(name = "categoria_id", nullable = false)
+	@NotNull(message = "A categoria é obrigatória.")
+	private Categoria categoria;
 
-    @ManyToOne
-    @JoinColumn(name = "transacao_recorrente_id")
-    private TransacaoRecorrente transacaoRecorrente; // Conexão com a transação recorrente
+	// Data da transação, padrão: Agora
+	private LocalDateTime dataTransacao = LocalDateTime.now();
 
-    private LocalDateTime dataTransacao;
-    private Double valor;
+	@Enumerated(EnumType.STRING)
+	@NotNull(message = "O tipo da transação (ENTRADA ou SAÍDA) é obrigatório.")
+	private TipoTransacao tipo;
 
-    @Enumerated(EnumType.STRING)
-    private TipoTransacao tipo;
+	@NotBlank(message = "A descrição da transação não pode estar vazia.")
+	private String descricao;
 
-    private String descricao;
-    private String formaPagamento;
-    private Integer parcelaAtual;
+	@NotNull(message = "O valor da transação é obrigatório.")
+	@Positive(message = "O valor da transação deve ser maior que zero.")
+	private Double valor;
 
-    // NOVO: relacionamento Many-to-Many com Tag
+	private String formaPagamento;
+
+	private Integer parcelaAtual; // Será null para transações únicas.
+
+	@ManyToOne
+	@JoinColumn(name = "transacao_recorrente_id")
+	private TransacaoRecorrente transacaoRecorrente;
+  
+   // NOVO: relacionamento Many-to-Many com Tag
     @ManyToMany
     @JoinTable(
         name = "transacao_tag",  // Tabela intermediária

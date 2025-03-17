@@ -3,9 +3,11 @@ package app.controllers;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import app.entities.Transacao;
+import app.enums.Periodicidade;
 import app.enums.TipoTransacao;
 import app.exceptions.TransacaoNotFoundException;
 import app.services.TransacaoService;
@@ -51,27 +53,59 @@ public class TransacaoController {
         return ResponseEntity.ok(transacoes);
     }
 
-    @PostMapping
-    public ResponseEntity<?> save(@Valid @RequestBody Transacao transacao) {
-        try {
-            return ResponseEntity.ok(transacaoService.save(transacao));
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.badRequest().body("Erro ao salvar: " + e.getMessage());
-        }
-    }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Transacao> update(@PathVariable Long id, @Valid @RequestBody Transacao transacao) {
-        try {
-            transacaoService.findById(id);
-            transacao.setId(id);
-            return ResponseEntity.ok(transacaoService.save(transacao));
-        } catch (TransacaoNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.badRequest().body(null);
-        }
-    }
+	/**
+	 * Retorna todas as transações filtradas por periodicidade (DIÁRIA, SEMANAL ou
+	 * MENSAL)
+	 */
+	@GetMapping("/periodicidade/{periodicidade}")
+	public ResponseEntity<List<Transacao>> findByPeriodicidade(@PathVariable Periodicidade periodicidade) {
+	    List<Transacao> transacoes = transacaoService.findByPeriodicidade(periodicidade);
+	    if (transacoes.isEmpty()) {
+	        return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); // Retorna 204 se não encontrar registros
+	    }
+	    return ResponseEntity.ok(transacoes);
+	}
+
+
+	/**
+	 * Retorna todas as transações de um usuário filtradas por periodicidade
+	 * (DIÁRIA, SEMANAL ou MENSAL)
+	 */
+	@GetMapping("/usuario/{usuarioId}/periodicidade/{periodicidade}")
+	public ResponseEntity<List<Transacao>> findByUsuarioAndPeriodicidade(@PathVariable Long usuarioId,
+			@PathVariable Periodicidade periodicidade) {
+		return ResponseEntity.ok(transacaoService.findByUsuarioAndPeriodicidade(usuarioId, periodicidade));
+	}
+
+	/**
+	 * Cria uma nova transação. Retorna erro 400 caso algum dos IDs seja inválido.
+	 */
+	@PostMapping
+	public ResponseEntity<?> save(@Valid @RequestBody Transacao transacao) {
+		try {
+			return ResponseEntity.ok(transacaoService.save(transacao));
+		} catch (DataIntegrityViolationException e) {
+			return ResponseEntity.badRequest().body("Erro ao salvar: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Atualiza uma transação existente pelo ID. Retorna erro 404 caso o ID não
+	 * exista.
+	 */
+	@PutMapping("/{id}")
+	public ResponseEntity<Transacao> update(@PathVariable Long id, @Valid @RequestBody Transacao transacao) {
+		try {
+			transacaoService.findById(id);
+			transacao.setId(id);
+			return ResponseEntity.ok(transacaoService.save(transacao));
+		} catch (TransacaoNotFoundException e) {
+			return ResponseEntity.notFound().build();
+		} catch (DataIntegrityViolationException e) {
+			return ResponseEntity.badRequest().body(null);
+		}
+	}
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
