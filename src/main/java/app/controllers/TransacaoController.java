@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,9 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import app.entities.Transacao;
+import app.enums.Periodicidade;
 import app.enums.TipoTransacao;
 import app.exceptions.TransacaoNotFoundException;
 import app.services.TransacaoService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/transacoes")
@@ -76,10 +79,34 @@ public class TransacaoController {
 	}
 
 	/**
+	 * Retorna todas as transações filtradas por periodicidade (DIÁRIA, SEMANAL ou
+	 * MENSAL)
+	 */
+	@GetMapping("/periodicidade/{periodicidade}")
+	public ResponseEntity<List<Transacao>> findByPeriodicidade(@PathVariable Periodicidade periodicidade) {
+	    List<Transacao> transacoes = transacaoService.findByPeriodicidade(periodicidade);
+	    if (transacoes.isEmpty()) {
+	        return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); // Retorna 204 se não encontrar registros
+	    }
+	    return ResponseEntity.ok(transacoes);
+	}
+
+
+	/**
+	 * Retorna todas as transações de um usuário filtradas por periodicidade
+	 * (DIÁRIA, SEMANAL ou MENSAL)
+	 */
+	@GetMapping("/usuario/{usuarioId}/periodicidade/{periodicidade}")
+	public ResponseEntity<List<Transacao>> findByUsuarioAndPeriodicidade(@PathVariable Long usuarioId,
+			@PathVariable Periodicidade periodicidade) {
+		return ResponseEntity.ok(transacaoService.findByUsuarioAndPeriodicidade(usuarioId, periodicidade));
+	}
+
+	/**
 	 * Cria uma nova transação. Retorna erro 400 caso algum dos IDs seja inválido.
 	 */
 	@PostMapping
-	public ResponseEntity<?> save(@RequestBody Transacao transacao) {
+	public ResponseEntity<?> save(@Valid @RequestBody Transacao transacao) {
 		try {
 			return ResponseEntity.ok(transacaoService.save(transacao));
 		} catch (DataIntegrityViolationException e) {
@@ -92,7 +119,7 @@ public class TransacaoController {
 	 * exista.
 	 */
 	@PutMapping("/{id}")
-	public ResponseEntity<Transacao> update(@PathVariable Long id, @RequestBody Transacao transacao) {
+	public ResponseEntity<Transacao> update(@PathVariable Long id, @Valid @RequestBody Transacao transacao) {
 		try {
 			transacaoService.findById(id);
 			transacao.setId(id);

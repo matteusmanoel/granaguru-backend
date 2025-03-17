@@ -12,6 +12,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,22 +30,31 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class Notificacao {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "usuario_id", nullable = false)
-    private Usuario usuario;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    private String titulo;
+	@ManyToOne
+	@JoinColumn(name = "usuario_id", nullable = false)
+	@NotNull(message = "O usuário da notificação é obrigatório.")
+	private Usuario usuario;
 
-    private String mensagem;
+	@NotBlank(message = "O título da notificação não pode estar em branco.")
+	@Size(max = 100, message = "O título da notificação deve ter no máximo 100 caracteres.")
+	private String titulo;
 
-    @Enumerated(EnumType.STRING)
-    private TipoNotificacao tipo;
+	@NotBlank(message = "A mensagem da notificação não pode estar em branco.")
+	@Size(max = 500, message = "A mensagem da notificação deve ter no máximo 500 caracteres.")
+	private String mensagem;
 
-    private LocalDateTime dataEnvio;
+	@Enumerated(EnumType.STRING)
+	@NotNull(message = "O tipo da notificação é obrigatório.")
+	private TipoNotificacao tipo;
 
-    private boolean lida;
+	@NotNull(message = "A data de envio da notificação é obrigatória.")
+	@PastOrPresent(message = "A data de envio da notificação não pode estar no futuro.")
+	private LocalDateTime dataEnvio;
+
+	private boolean lida;
 }

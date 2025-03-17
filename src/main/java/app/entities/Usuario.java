@@ -3,14 +3,29 @@ package app.entities;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import app.enums.StatusUsuario;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
+
+import app.enums.StatusUsuario;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "usuarios")
@@ -19,36 +34,37 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) //Diz ao Hibernate que ignore as propriedades de proxy, evitando erros de serialização (Objeto Java -> JSON)
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" }) // Evita erros de serialização (Hibernate -> JSON)
 public class Usuario {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @NotBlank
-    @Size(min = 3, max = 100)
-    private String nome;
+	@NotBlank(message = "O nome do usuário não pode estar em branco.")
+	@Size(min = 3, max = 100, message = "O nome do usuário deve ter entre 3 e 100 caracteres.")
+	private String nome;
 
-    @NotBlank
-    @Email
-    @Column(unique = true)
-    @Size(max = 255)
-    private String email;
+	@NotBlank(message = "O e-mail do usuário não pode estar em branco.")
+	@Email(message = "O e-mail informado não é válido.")
+	@Column(unique = true)
+	@Size(max = 255, message = "O e-mail do usuário deve ter no máximo 255 caracteres.")
+	private String email;
 
-    @NotBlank
-    @Size(min = 6)
-    private String senha;
+	@NotBlank(message = "A senha do usuário não pode estar em branco.")
+	@Size(min = 6, message = "A senha do usuário deve ter pelo menos 6 caracteres.")
+	private String senha;
 
-    @Builder.Default
-    @Column(name = "data_criacao", nullable = false, updatable = false)
-    private LocalDateTime dataCriacao = LocalDateTime.now();
+	@Builder.Default
+	@Column(name = "data_criacao", nullable = false, updatable = false)
+	@PastOrPresent(message = "A data de criação do usuário não pode estar no futuro.")
+	private LocalDateTime dataCriacao = LocalDateTime.now();
 
-    @Enumerated(EnumType.STRING)
-    private StatusUsuario status;
+	@Enumerated(EnumType.STRING)
+	@NotNull(message = "O status do usuário é obrigatório.")
+	private StatusUsuario status;
 
-    @OneToMany(mappedBy = "usuario")
-    @JsonIgnore
-    private List<Meta> metas;
-
+	@OneToMany(mappedBy = "usuario")
+	@JsonIgnore
+	private List<Meta> metas;
 }
