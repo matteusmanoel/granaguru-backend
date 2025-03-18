@@ -2,8 +2,17 @@ package app.entities;
 
 import java.util.List;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "tags")
@@ -14,13 +23,13 @@ import lombok.*;
 @Builder
 public class Tag {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    private String nome;
+	private String nome;
 
-    // Relacionamento Many-to-Many (lado inverso)
-    @ManyToMany(mappedBy = "tags")
-    private List<Transacao> transacoes;
+	// Relacionamento Many-to-Many (lado inverso)
+	@ManyToMany(mappedBy = "tags")
+	private List<Transacao> transacoes;
 }

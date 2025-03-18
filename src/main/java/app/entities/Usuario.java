@@ -3,12 +3,8 @@ package app.entities;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
-import app.enums.StatusUsuario;
-import com.fasterxml.jackson.annotation.JsonIgnore; // para ignorar a relação, se necessário
-import jakarta.persistence.*;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import app.enums.StatusUsuario;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,7 +33,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class Usuario {
 
 	@Id
@@ -68,6 +63,6 @@ public class Usuario {
 	private StatusUsuario status;
 
 	@OneToMany(mappedBy = "usuario")
-	@JsonIgnore
+	@JsonIgnoreProperties({ "usuario" }) // Evita referência cíclica ao serializar metas
 	private List<Meta> metas;
 }

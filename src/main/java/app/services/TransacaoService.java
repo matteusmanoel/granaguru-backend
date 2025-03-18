@@ -24,7 +24,6 @@ import app.repositories.TagRepository;
 import app.repositories.TransacaoRecorrenteRepository;
 import app.repositories.TransacaoRepository;
 import app.repositories.UsuarioRepository;
-import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
