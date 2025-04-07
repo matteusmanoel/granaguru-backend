@@ -144,9 +144,9 @@ public class TransacaoService {
 		transacao.setCategoria(categoria);
     
     // Processa as tags, se houver
-        if (transacao.getTags() != null && !transacao.getTags().isEmpty()) {
+        if (transacao.getTag() != null && !transacao.getTag().isEmpty()) {
             List<Tag> tagsProcessadas = new ArrayList<>();
-            transacao.getTags().forEach(tag -> {
+            transacao.getTag().forEach(tag -> {
                 if (tag.getId() != null) {
                     Tag tagCompleta = tagRepository.findById(tag.getId())
                             .orElseThrow(() -> new DataIntegrityViolationException("Tag não encontrada com ID: " + tag.getId()));
@@ -157,7 +157,7 @@ public class TransacaoService {
                     tagsProcessadas.add(novaTag);
                 }
             });
-            transacao.setTags(tagsProcessadas);
+            transacao.setTag(tagsProcessadas);
         }
 
 		return transacaoRepository.save(transacao);
