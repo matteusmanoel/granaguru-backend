@@ -41,6 +41,7 @@ public class Orcamento {
 
 	@ManyToOne
 	@JoinColumn(name = "categoria_id")
+	@NotNull(message = "A categoria do orçamento é obrigatória.")
 	private Categoria categoria;
 
 	@NotBlank(message = "O período do orçamento não pode estar em branco.")

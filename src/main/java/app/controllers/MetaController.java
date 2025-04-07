@@ -13,6 +13,7 @@ import app.services.MetaService;
 
 @RestController
 @RequestMapping("/metas")
+@CrossOrigin(origins = "http://localhost:4200") 
 public class MetaController {
 
     @Autowired

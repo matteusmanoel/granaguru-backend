@@ -11,6 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 @RestController
 @RequestMapping("/orcamentos")
+@CrossOrigin(origins = "http://localhost:4200")
 public class OrcamentoController {
 
 	@Autowired

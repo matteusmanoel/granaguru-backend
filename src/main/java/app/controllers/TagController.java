@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/tags")
+@CrossOrigin(origins = "http://localhost:4200")
 public class TagController {
 
     @Autowired

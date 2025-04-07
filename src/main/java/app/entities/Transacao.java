@@ -76,7 +76,7 @@ public class Transacao {
 
 	// NOVO: relacionamento Many-to-Many com Tag
 	@ManyToMany
-	@JoinTable(name = "transacao_tag", // Tabela intermediária
+	@JoinTable(name = "transacoes_tags", // Tabela intermediária
 			joinColumns = @JoinColumn(name = "transacao_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
-	private List<Tag> tags;
+	private List<Tag> tag;
 }
