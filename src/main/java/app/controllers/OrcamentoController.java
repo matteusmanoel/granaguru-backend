@@ -4,10 +4,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
+
 import app.entities.Orcamento;
-import app.exceptions.OrcamentoNotFoundException;
 import app.services.OrcamentoService;
-import org.springframework.dao.DataIntegrityViolationException;
 
 @RestController
 @RequestMapping("/orcamentos")
@@ -26,15 +25,12 @@ public class OrcamentoController {
 	}
 
 	/**
-	 * Busca um orçamento pelo ID. Retorna erro 404 caso não seja encontrado.
+	 * Busca um orçamento pelo ID.
 	 */
 	@GetMapping("/{id}")
 	public ResponseEntity<Orcamento> findById(@PathVariable Long id) {
-		try {
-			return ResponseEntity.ok(orcamentoService.findById(id));
-		} catch (OrcamentoNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		}
+		Orcamento orcamento = orcamentoService.findById(id);
+		return ResponseEntity.ok(orcamento);
 	}
 
 	/**
@@ -49,41 +45,28 @@ public class OrcamentoController {
 	 * Cria um novo orçamento.
 	 */
 	@PostMapping
-	public ResponseEntity<?> save(@RequestBody Orcamento orcamento) {
-		try {
-			return ResponseEntity.ok(orcamentoService.save(orcamento));
-		} catch (DataIntegrityViolationException e) {
-			return ResponseEntity.badRequest().body("Erro ao salvar: " + e.getMessage());
-		}
+	public ResponseEntity<Orcamento> save(@RequestBody Orcamento orcamento) {
+		Orcamento novo = orcamentoService.save(orcamento);
+		return ResponseEntity.ok(novo);
 	}
 
 	/**
-	 * Atualiza um orçamento existente pelo ID. Retorna erro 404 caso o ID não
-	 * exista.
+	 * Atualiza um orçamento existente pelo ID.
 	 */
 	@PutMapping("/{id}")
 	public ResponseEntity<Orcamento> update(@PathVariable Long id, @RequestBody Orcamento orcamento) {
-		try {
-			orcamentoService.findById(id);
-			orcamento.setId(id);
-			return ResponseEntity.ok(orcamentoService.save(orcamento));
-		} catch (OrcamentoNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		} catch (DataIntegrityViolationException e) {
-			return ResponseEntity.badRequest().body(null);
-		}
+		orcamentoService.findById(id); // lança OrcamentoNotFoundException se não existir
+		orcamento.setId(id);
+		Orcamento atualizado = orcamentoService.save(orcamento);
+		return ResponseEntity.ok(atualizado);
 	}
 
 	/**
-	 * Exclui um orçamento pelo ID. Retorna erro 404 se não for encontrado.
+	 * Exclui um orçamento pelo ID.
 	 */
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
-		try {
-			orcamentoService.deleteById(id);
-			return ResponseEntity.noContent().build();
-		} catch (OrcamentoNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		}
+		orcamentoService.deleteById(id);
+		return ResponseEntity.noContent().build();
 	}
 }

@@ -3,20 +3,10 @@ package app.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import app.entities.Notificacao;
-import app.exceptions.NotificacaoNotFoundException;
 import app.services.NotificacaoService;
 
 @RestController
@@ -36,15 +26,12 @@ public class NotificacaoController {
 	}
 
 	/**
-	 * Busca uma notificação pelo ID. Retorna erro 404 caso não seja encontrada.
+	 * Busca uma notificação pelo ID.
 	 */
 	@GetMapping("/{id}")
 	public ResponseEntity<Notificacao> findById(@PathVariable Long id) {
-		try {
-			return ResponseEntity.ok(notificacaoService.findById(id));
-		} catch (NotificacaoNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		}
+		Notificacao notificacao = notificacaoService.findById(id);
+		return ResponseEntity.ok(notificacao);
 	}
 
 	/**
@@ -59,41 +46,28 @@ public class NotificacaoController {
 	 * Cria uma nova notificação.
 	 */
 	@PostMapping
-	public ResponseEntity<?> save(@RequestBody Notificacao notificacao) {
-		try {
-			return ResponseEntity.ok(notificacaoService.save(notificacao));
-		} catch (DataIntegrityViolationException e) {
-			return ResponseEntity.badRequest().body("Erro ao salvar: " + e.getMessage());
-		}
+	public ResponseEntity<Notificacao> save(@RequestBody Notificacao notificacao) {
+		Notificacao nova = notificacaoService.save(notificacao);
+		return ResponseEntity.ok(nova);
 	}
 
 	/**
-	 * Atualiza uma notificação existente pelo ID. Retorna erro 404 caso o ID não
-	 * exista.
+	 * Atualiza uma notificação existente pelo ID.
 	 */
 	@PutMapping("/{id}")
 	public ResponseEntity<Notificacao> update(@PathVariable Long id, @RequestBody Notificacao notificacao) {
-		try {
-			notificacaoService.findById(id);
-			notificacao.setId(id);
-			return ResponseEntity.ok(notificacaoService.save(notificacao));
-		} catch (NotificacaoNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		} catch (DataIntegrityViolationException e) {
-			return ResponseEntity.badRequest().body(null);
-		}
+		notificacaoService.findById(id); // valida se existe
+		notificacao.setId(id);
+		Notificacao atualizada = notificacaoService.save(notificacao);
+		return ResponseEntity.ok(atualizada);
 	}
 
 	/**
-	 * Exclui uma notificação pelo ID. Retorna erro 404 se não for encontrada.
+	 * Exclui uma notificação pelo ID.
 	 */
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
-		try {
-			notificacaoService.deleteById(id);
-			return ResponseEntity.noContent().build();
-		} catch (NotificacaoNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		}
+		notificacaoService.deleteById(id);
+		return ResponseEntity.noContent().build();
 	}
 }

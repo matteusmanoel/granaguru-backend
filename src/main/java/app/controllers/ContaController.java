@@ -3,20 +3,10 @@ package app.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import app.entities.Conta;
-import app.exceptions.ContaNotFoundException;
 import app.services.ContaService;
 
 @RestController
@@ -36,15 +26,12 @@ public class ContaController {
 	}
 
 	/**
-	 * Busca uma conta pelo ID. Retorna erro 404 caso não seja encontrada.
+	 * Busca uma conta pelo ID.
 	 */
 	@GetMapping("/{id}")
 	public ResponseEntity<Conta> findById(@PathVariable Long id) {
-		try {
-			return ResponseEntity.ok(contaService.findById(id));
-		} catch (ContaNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		}
+		Conta conta = contaService.findById(id);
+		return ResponseEntity.ok(conta);
 	}
 
 	/**
@@ -59,40 +46,28 @@ public class ContaController {
 	 * Cria uma nova conta.
 	 */
 	@PostMapping
-	public ResponseEntity<?> save(@RequestBody Conta conta) {
-		try {
-			return ResponseEntity.ok(contaService.save(conta));
-		} catch (DataIntegrityViolationException e) {
-			return ResponseEntity.badRequest().body("Erro ao salvar: " + e.getMessage());
-		}
+	public ResponseEntity<Conta> save(@RequestBody Conta conta) {
+		Conta novaConta = contaService.save(conta);
+		return ResponseEntity.ok(novaConta);
 	}
 
 	/**
-	 * Atualiza uma conta existente pelo ID. Retorna erro 404 caso o ID não exista.
+	 * Atualiza uma conta existente pelo ID.
 	 */
 	@PutMapping("/{id}")
 	public ResponseEntity<Conta> update(@PathVariable Long id, @RequestBody Conta conta) {
-		try {
-			contaService.findById(id);
-			conta.setId(id);
-			return ResponseEntity.ok(contaService.save(conta));
-		} catch (ContaNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		} catch (DataIntegrityViolationException e) {
-			return ResponseEntity.badRequest().body(null);
-		}
+		contaService.findById(id); // se não existir, lança ContaNotFoundException
+		conta.setId(id);
+		Conta atualizada = contaService.save(conta);
+		return ResponseEntity.ok(atualizada);
 	}
 
 	/**
-	 * Exclui uma conta pelo ID. Retorna erro 404 se não for encontrada.
+	 * Exclui uma conta pelo ID.
 	 */
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteById(@PathVariable Long id) {
-		try {
-			contaService.deleteById(id);
-			return ResponseEntity.noContent().build();
-		} catch (ContaNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		}
+		contaService.deleteById(id);
+		return ResponseEntity.noContent().build();
 	}
 }
