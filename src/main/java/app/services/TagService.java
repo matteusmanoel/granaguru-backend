@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import app.entities.Tag;
@@ -31,6 +32,18 @@ public class TagService {
     }
 
     public Tag save(Tag tag) {
+        Optional<Tag> existente = tagRepository.findByNome(tag.getNome());
+
+        // Se for criação (tag sem ID) e nome já existe
+        if (tag.getId() == null && existente.isPresent()) {
+            throw new DataIntegrityViolationException("Já existe uma tag com esse nome.");
+        }
+
+        // Se for edição e nome já existe em outra tag
+        if (tag.getId() != null && existente.isPresent() && !existente.get().getId().equals(tag.getId())) {
+            throw new DataIntegrityViolationException("Já existe uma tag com esse nome.");
+        }
+
         return tagRepository.save(tag);
     }
 

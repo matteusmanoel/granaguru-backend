@@ -87,7 +87,7 @@ public class TransacaoRecorrenteService {
 
 		processarTransacoesRecorrentes(savedRecorrente);
 
-		return savedRecorrente;s
+		return savedRecorrente;
 	}
 
 	/**

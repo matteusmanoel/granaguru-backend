@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -65,7 +66,7 @@ public class GlobalExceptionHandler {
         return ex.getMessage();
     }
 
-    // === VALIDATIONS ===
+    // === VALIDATIONS (bean validation - @Valid / @Validated) ===
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -85,6 +86,22 @@ public class GlobalExceptionHandler {
             errors.put(violation.getPropertyPath().toString(), violation.getMessage());
         }
         return errors;
+    }
+
+    // === JPA TRANSACTION WRAPPER (ex: falha por causa de Bean Validation em @Transactional) ===
+
+    @ExceptionHandler(TransactionSystemException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleTransactionSystemException(TransactionSystemException ex) {
+        Throwable cause = ex.getRootCause();
+        if (cause instanceof ConstraintViolationException violationEx) {
+            StringBuilder message = new StringBuilder("Erro de validação: ");
+            for (ConstraintViolation<?> violation : violationEx.getConstraintViolations()) {
+                message.append(violation.getPropertyPath()).append(": ").append(violation.getMessage()).append("; ");
+            }
+            return message.toString();
+        }
+        return "Erro de transação. Verifique os dados enviados.";
     }
 
     // === DATA INTEGRITY ===

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import app.entities.Meta;
 import app.services.MetaService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/metas")
@@ -45,7 +46,8 @@ public class MetaController {
      * Cria uma nova meta.
      */
     @PostMapping
-    public ResponseEntity<Meta> save(@RequestBody Meta meta) {
+    public ResponseEntity<Meta> save(@Valid @RequestBody Meta meta) {
+
         Meta novaMeta = metaService.save(meta);
         return ResponseEntity.ok(novaMeta);
     }
@@ -54,7 +56,7 @@ public class MetaController {
      * Atualiza uma meta existente pelo ID.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Meta> update(@PathVariable Long id, @RequestBody Meta metaAtualizada) {
+    public ResponseEntity<Meta> update(@PathVariable Long id, @Valid @RequestBody Meta metaAtualizada) {
         Meta atualizada = metaService.update(id, metaAtualizada);
         return ResponseEntity.ok(atualizada);
     }
