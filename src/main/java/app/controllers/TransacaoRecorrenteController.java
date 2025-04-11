@@ -3,20 +3,10 @@ package app.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import app.entities.TransacaoRecorrente;
-import app.exceptions.TransacaoRecorrenteNotFoundException;
 import app.services.TransacaoRecorrenteService;
 import jakarta.validation.Valid;
 
@@ -37,59 +27,41 @@ public class TransacaoRecorrenteController {
 	}
 
 	/**
-	 * Busca uma transação recorrente pelo ID. Retorna 404 se não for encontrada.
+	 * Busca uma transação recorrente pelo ID.
 	 */
 	@GetMapping("/{id}")
 	public ResponseEntity<TransacaoRecorrente> findById(@PathVariable Long id) {
-		try {
-			return ResponseEntity.ok(transacaoRecorrenteService.findById(id));
-		} catch (TransacaoRecorrenteNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		}
+		TransacaoRecorrente transacao = transacaoRecorrenteService.findById(id);
+		return ResponseEntity.ok(transacao);
 	}
 
 	/**
-	 * Cria uma nova transação recorrente. Retorna erro 400 caso algum dos IDs seja
-	 * inválido.
+	 * Cria uma nova transação recorrente.
 	 */
 	@PostMapping
-	public ResponseEntity<?> save(@Valid @RequestBody TransacaoRecorrente transacaoRecorrente) {
-		try {
-			return ResponseEntity.ok(transacaoRecorrenteService.save(transacaoRecorrente));
-		} catch (DataIntegrityViolationException e) {
-			return ResponseEntity.badRequest().body("Erro ao salvar: " + e.getMessage());
-		}
+	public ResponseEntity<TransacaoRecorrente> save(@Valid @RequestBody TransacaoRecorrente transacaoRecorrente) {
+		TransacaoRecorrente nova = transacaoRecorrenteService.save(transacaoRecorrente);
+		return ResponseEntity.ok(nova);
 	}
 
 	/**
-	 * Atualiza uma transação recorrente existente pelo ID. Retorna erro 404 caso o
-	 * ID não exista.
+	 * Atualiza uma transação recorrente existente pelo ID.
 	 */
 	@PutMapping("/{id}")
 	public ResponseEntity<TransacaoRecorrente> update(@PathVariable Long id,
-			@RequestBody TransacaoRecorrente transacaoRecorrente) {
-		try {
-			transacaoRecorrenteService.findById(id);
-			transacaoRecorrente.setId(id);
-			return ResponseEntity.ok(transacaoRecorrenteService.save(transacaoRecorrente));
-		} catch (TransacaoRecorrenteNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		} catch (DataIntegrityViolationException e) {
-			return ResponseEntity.badRequest().body(null);
-		}
+	                                                  @RequestBody TransacaoRecorrente transacaoRecorrente) {
+		transacaoRecorrenteService.findById(id); // lança NotFound se não existir
+		transacaoRecorrente.setId(id);
+		TransacaoRecorrente atualizada = transacaoRecorrenteService.save(transacaoRecorrente);
+		return ResponseEntity.ok(atualizada);
 	}
 
 	/**
-	 * Exclui uma transação recorrente pelo ID. Retorna erro 404 se não for
-	 * encontrada.
+	 * Exclui uma transação recorrente pelo ID.
 	 */
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteById(@PathVariable Long id) {
-		try {
-			transacaoRecorrenteService.deleteById(id);
-			return ResponseEntity.noContent().build();
-		} catch (TransacaoRecorrenteNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		}
+		transacaoRecorrenteService.deleteById(id);
+		return ResponseEntity.noContent().build();
 	}
 }

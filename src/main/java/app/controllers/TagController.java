@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import app.entities.Tag;
 import app.services.TagService;
 import jakarta.validation.Valid;
@@ -16,34 +17,48 @@ public class TagController {
     @Autowired
     private TagService tagService;
 
+    /**
+     * Lista todas as tags
+     */
     @GetMapping
     public List<Tag> findAll() {
         return tagService.findAll();
     }
 
+    /**
+     * Busca tag por ID. Retorna 404 se não existir.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<Tag> findById(@PathVariable Long id) {
-        Tag tag = tagService.findById(id);
+        Tag tag = tagService.findById(id); // lança TagNotFoundException se não existir
         return ResponseEntity.ok(tag);
     }
 
+    /**
+     * Cria nova tag
+     */
     @PostMapping
     public ResponseEntity<Tag> create(@Valid @RequestBody Tag tag) {
         Tag novaTag = tagService.save(tag);
         return ResponseEntity.ok(novaTag);
     }
 
+    /**
+     * Atualiza tag existente
+     */
     @PutMapping("/{id}")
     public ResponseEntity<Tag> update(@PathVariable Long id, @Valid @RequestBody Tag tag) {
-        // Aqui, para atualizar, você pode setar o id recebido
         tag.setId(id);
         Tag tagAtualizada = tagService.save(tag);
         return ResponseEntity.ok(tagAtualizada);
     }
 
+    /**
+     * Exclui tag por ID
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        tagService.deleteById(id);
+        tagService.deleteById(id); // lança TagNotFoundException se não existir
         return ResponseEntity.noContent().build();
     }
 }

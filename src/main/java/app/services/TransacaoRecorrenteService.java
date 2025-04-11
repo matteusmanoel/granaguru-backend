@@ -87,7 +87,7 @@ public class TransacaoRecorrenteService {
 
 		processarTransacoesRecorrentes(savedRecorrente);
 
-		return savedRecorrente;
+		return savedRecorrente;s
 	}
 
 	/**
@@ -95,10 +95,11 @@ public class TransacaoRecorrenteService {
 	 */
 	public void deleteById(Long id) {
 		if (!transacaoRecorrenteRepository.existsById(id)) {
-			throw new TransacaoNotFoundException(id);
+			throw new TransacaoRecorrenteNotFoundException(id);
 		}
 		transacaoRecorrenteRepository.deleteById(id);
 	}
+
 
 	public void processarTransacoesRecorrentes(TransacaoRecorrente recorrente) {
 

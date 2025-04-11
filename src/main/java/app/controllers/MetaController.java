@@ -3,12 +3,10 @@ package app.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import app.entities.Meta;
-import app.exceptions.MetaNotFoundException;
 import app.services.MetaService;
 
 @RestController
@@ -36,53 +34,37 @@ public class MetaController {
     }
 
     /**
-     * Busca uma meta pelo ID. Retorna 404 se não for encontrada.
+     * Busca uma meta pelo ID.
      */
     @GetMapping("/{id}")
     public ResponseEntity<Meta> findById(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(metaService.findById(id));
-        } catch (MetaNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(metaService.findById(id));
     }
 
     /**
-     * Cria uma nova meta. Retorna erro 400 caso já exista uma com a mesma descrição.
+     * Cria uma nova meta.
      */
     @PostMapping
-    public ResponseEntity<?> save(@RequestBody Meta meta) {
-        try {
-            return ResponseEntity.ok(metaService.save(meta));
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.badRequest().body("Erro ao salvar: " + e.getMessage());
-        }
+    public ResponseEntity<Meta> save(@RequestBody Meta meta) {
+        Meta novaMeta = metaService.save(meta);
+        return ResponseEntity.ok(novaMeta);
     }
 
     /**
-     * Atualiza uma meta existente pelo ID. Retorna erro 404 caso o ID não exista.
+     * Atualiza uma meta existente pelo ID.
      */
     @PutMapping("/{id}")
     public ResponseEntity<Meta> update(@PathVariable Long id, @RequestBody Meta metaAtualizada) {
-        try {
-            return ResponseEntity.ok(metaService.update(id, metaAtualizada));
-        } catch (MetaNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.badRequest().body(null);
-        }
+        Meta atualizada = metaService.update(id, metaAtualizada);
+        return ResponseEntity.ok(atualizada);
     }
 
     /**
-     * Exclui uma meta pelo ID. Retorna erro 404 se não for encontrada.
+     * Exclui uma meta pelo ID.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
-        try {
-            metaService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        } catch (MetaNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        metaService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
