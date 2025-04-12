@@ -109,7 +109,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-        return "Erro de integridade de dados: " + ex.getMostSpecificCause().getMessage();
+        String causa = ex.getMostSpecificCause().getMessage();
+
+        if (causa != null && causa.contains("foreign key constraint")) {
+            return "Não é possível excluir o usuário. Existem registros vinculados a ele.";
+        }
+
+        return "Erro de integridade de dados: " + causa;
     }
 
     // === GENERIC ERROR ===
