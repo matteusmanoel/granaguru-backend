@@ -14,7 +14,6 @@ import app.entities.Transacao;
 import app.entities.TransacaoRecorrente;
 import app.entities.Usuario;
 import app.enums.Periodicidade;
-import app.exceptions.TransacaoNotFoundException;
 import app.exceptions.TransacaoRecorrenteNotFoundException;
 import app.repositories.CategoriaRepository;
 import app.repositories.ContaRepository;
@@ -73,15 +72,17 @@ public class TransacaoRecorrenteService {
 		transacaoRecorrente.setConta(conta);
 		transacaoRecorrente.setCategoria(categoria);
 
-//		// 🔹 Se for um parcelamento fechado, verifica se todas as parcelas foram
-//		// geradas
-//		if (!recorrente.isDespesaFixa() && recorrente.getProximaExecucao().isAfter(recorrente.getDataFinal())) {
-//			transacaoRecorrenteRepository.delete(recorrente); // Remove da base após todas as parcelas serem criadas
-//																// (**Verificar se não é interesante manter o
-//																// registro**)
-//		} else {
-//			transacaoRecorrenteRepository.save(recorrente);
-//		}
+		// // 🔹 Se for um parcelamento fechado, verifica se todas as parcelas foram
+		// // geradas
+		// if (!recorrente.isDespesaFixa() &&
+		// recorrente.getProximaExecucao().isAfter(recorrente.getDataFinal())) {
+		// transacaoRecorrenteRepository.delete(recorrente); // Remove da base após
+		// todas as parcelas serem criadas
+		// // (**Verificar se não é interesante manter o
+		// // registro**)
+		// } else {
+		// transacaoRecorrenteRepository.save(recorrente);
+		// }
 
 		TransacaoRecorrente savedRecorrente = transacaoRecorrenteRepository.save(transacaoRecorrente);
 
@@ -99,7 +100,6 @@ public class TransacaoRecorrenteService {
 		}
 		transacaoRecorrenteRepository.deleteById(id);
 	}
-
 
 	public void processarTransacoesRecorrentes(TransacaoRecorrente recorrente) {
 
@@ -142,16 +142,16 @@ public class TransacaoRecorrenteService {
 	 */
 	private LocalDateTime calcularProximaExecucao(LocalDateTime dataAtual, Periodicidade periodicidade) {
 		switch (periodicidade) {
-		case DIARIA:
-			return dataAtual.plusDays(1);
-		case SEMANAL:
-			return dataAtual.plusWeeks(1);
-		case MENSAL:
-			return dataAtual.plusMonths(1);
-		case ANUAL:
-			return dataAtual.plusYears(1);
-		default:
-			throw new IllegalArgumentException("Periodicidade inválida: " + periodicidade);
+			case DIARIA:
+				return dataAtual.plusDays(1);
+			case SEMANAL:
+				return dataAtual.plusWeeks(1);
+			case MENSAL:
+				return dataAtual.plusMonths(1);
+			case ANUAL:
+				return dataAtual.plusYears(1);
+			default:
+				throw new IllegalArgumentException("Periodicidade inválida: " + periodicidade);
 		}
 	}
 
@@ -187,33 +187,33 @@ public class TransacaoRecorrenteService {
 	 * de transações já geradas.
 	 */
 	private int calcularParcelaAtual(TransacaoRecorrente recorrente, LocalDateTime dataExecucao) {
-	    // Verifica se a transação recorrente tem uma data inicial válida
-	    if (recorrente.getDataInicial() == null) {
-	        throw new IllegalArgumentException("A transação recorrente precisa ter uma data inicial definida.");
-	    }
+		// Verifica se a transação recorrente tem uma data inicial válida
+		if (recorrente.getDataInicial() == null) {
+			throw new IllegalArgumentException("A transação recorrente precisa ter uma data inicial definida.");
+		}
 
-	    // Calcula a diferença de tempo entre a data inicial e a data da transação que será gerada
-	    long diferenca = 0;
+		// Calcula a diferença de tempo entre a data inicial e a data da transação que
+		// será gerada
+		long diferenca = 0;
 
-	    switch (recorrente.getPeriodicidade()) {
-	        case DIARIA:
-	            diferenca = ChronoUnit.DAYS.between(recorrente.getDataInicial(), dataExecucao);
-	            break;
-	        case SEMANAL:
-	            diferenca = ChronoUnit.WEEKS.between(recorrente.getDataInicial(), dataExecucao);
-	            break;
-	        case MENSAL:
-	            diferenca = ChronoUnit.MONTHS.between(recorrente.getDataInicial(), dataExecucao);
-	            break;
-	        case ANUAL:
-	            diferenca = ChronoUnit.YEARS.between(recorrente.getDataInicial(), dataExecucao);
-	            break;
-	        default:
-	            throw new IllegalArgumentException("Periodicidade desconhecida: " + recorrente.getPeriodicidade());
-	    }
+		switch (recorrente.getPeriodicidade()) {
+			case DIARIA:
+				diferenca = ChronoUnit.DAYS.between(recorrente.getDataInicial(), dataExecucao);
+				break;
+			case SEMANAL:
+				diferenca = ChronoUnit.WEEKS.between(recorrente.getDataInicial(), dataExecucao);
+				break;
+			case MENSAL:
+				diferenca = ChronoUnit.MONTHS.between(recorrente.getDataInicial(), dataExecucao);
+				break;
+			case ANUAL:
+				diferenca = ChronoUnit.YEARS.between(recorrente.getDataInicial(), dataExecucao);
+				break;
+			default:
+				throw new IllegalArgumentException("Periodicidade desconhecida: " + recorrente.getPeriodicidade());
+		}
 
-	    return (int) diferenca + 1; // Retorna a parcela correta, considerando a primeira como 1
+		return (int) diferenca + 1; // Retorna a parcela correta, considerando a primeira como 1
 	}
-
 
 }

@@ -7,7 +7,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import app.entities.Meta;
 import app.entities.Usuario;
-import app.enums.StatusMeta;
 import app.exceptions.MetaNotFoundException;
 import app.repositories.MetaRepository;
 import app.repositories.UsuarioRepository;

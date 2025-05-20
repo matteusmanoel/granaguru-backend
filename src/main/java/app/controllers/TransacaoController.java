@@ -25,6 +25,17 @@ public class TransacaoController {
         return transacaoService.findAll();
     }
 
+    @GetMapping("/filtro")
+    public ResponseEntity<List<Transacao>> buscarComFiltros(
+            @RequestParam(required = false) String tipo,
+            @RequestParam(required = false) Long categoriaId,
+            @RequestParam(required = false) Long contaId,
+            @RequestParam(required = false) Long usuarioId
+    ) {
+        List<Transacao> transacoes = transacaoService.buscarComFiltros(tipo, categoriaId, contaId, usuarioId);
+        return transacoes.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(transacoes);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Transacao> findById(@PathVariable Long id) {
         Transacao transacao = transacaoService.findById(id);
