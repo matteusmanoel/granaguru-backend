@@ -80,7 +80,6 @@ public class UsuarioService {
 	}
 
 	public void deleteById(Long id) {
-		Usuario usuario = findById(id);
 		usuarioRepository.deleteById(id);
 	}
 

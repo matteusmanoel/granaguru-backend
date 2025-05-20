@@ -56,6 +56,18 @@ public class TransacaoService {
 	 * transacoes sob demanda, conforme a coluna proximaExecucao da tabela
 	 * transacoes_recorrentes.
 	 */
+  
+  public List<Transacao> buscarComFiltros(String tipo, Long categoriaId, Long contaId, Long usuarioId) {
+	    List<Transacao> todas = transacaoRepository.findAll();
+
+	    return todas.stream()
+	            .filter(t -> (tipo == null || t.getTipo().name().equalsIgnoreCase(tipo)))
+	            .filter(t -> (categoriaId == null || (t.getCategoria() != null && t.getCategoria().getId().equals(categoriaId))))
+	            .filter(t -> (contaId == null || (t.getConta() != null && t.getConta().getId().equals(contaId))))
+	            .filter(t -> (usuarioId == null || (t.getUsuario() != null && t.getUsuario().getId().equals(usuarioId))))
+	            .toList();
+	}
+
 	public List<Transacao> findAll() {
 		// 🔹 Busca transações recorrentes pendentes de execução
 		List<TransacaoRecorrente> recorrenciasPendentes = transacaoRecorrenteRepository.findRecorrenciasParaProcessar();
