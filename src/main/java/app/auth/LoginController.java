@@ -22,7 +22,7 @@ public class LoginController {
 
 		String token = loginService.logar(login);
 		return new ResponseEntity<>(token, HttpStatus.OK);
-		
+
 	}
 
 }

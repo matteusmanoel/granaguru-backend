@@ -1,17 +1,13 @@
-# Limpa e executa os testes com cobertura
-Write-Host "Executando testes com cobertura..." -ForegroundColor Green
-mvn clean test jacoco:report
+# Script para executar testes e gerar relatório de cobertura
+Write-Host "Executando testes e gerando relatório de cobertura com JaCoCo..."
+mvn clean test jacoco:report -Dsurefire.failIfNoSpecifiedTests=false
 
-# Verifica se os testes passaram
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "`nTestes executados com sucesso!" -ForegroundColor Green
-    Write-Host "Relatório de cobertura disponível em: target/site/jacoco/index.html" -ForegroundColor Yellow
-    
-    # Pergunta se deseja abrir o relatório
-    $abrir = Read-Host "Deseja abrir o relatório de cobertura? (S/N)"
-    if ($abrir -eq "S" -or $abrir -eq "s") {
-        Start-Process "target/site/jacoco/index.html"
-    }
+# Abrir o relatório de cobertura
+$reportPath = "target/site/jacoco/index.html"
+if (Test-Path $reportPath) {
+    Write-Host "Relatório de cobertura gerado em: $reportPath"
+    Write-Host "Abrindo relatório..."
+    Start-Process $reportPath
 } else {
-    Write-Host "`nErro na execução dos testes!" -ForegroundColor Red
+    Write-Host "Relatório não foi gerado. Verifique se os testes foram executados com sucesso."
 } 

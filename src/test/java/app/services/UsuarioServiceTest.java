@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import app.entities.Usuario;
 import app.enums.StatusUsuario;
@@ -27,6 +28,9 @@ public class UsuarioServiceTest {
 
     @InjectMocks
     private UsuarioService usuarioService;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     private Usuario usuario;
 
@@ -149,6 +153,7 @@ public class UsuarioServiceTest {
     @Test
     @DisplayName("Deve deletar usuário por ID com sucesso")
     void testDeleteById() {
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(new Usuario()));
         doNothing().when(usuarioRepository).deleteById(1L);
         assertDoesNotThrow(() -> usuarioService.deleteById(1L));
         verify(usuarioRepository).deleteById(1L);

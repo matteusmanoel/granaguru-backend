@@ -19,32 +19,28 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 @Service
-public class JwtServiceGenerator {  
+public class JwtServiceGenerator {
 
 	///////////////////////////////////////////////////////
-	//Parâmetros para geração do token
+	// Parâmetros para geração do token
 	public static final String SECRET_KEY = "aSBOB2SFMjg434Rjh9KK6NeIjXrQ7H4SIkJt8idT5oyGKIjnFykC9nL93Acc3WT9cnVBHxos2hVEFvAIrigOJg44";
 	public static final SignatureAlgorithm ALGORITMO_ASSINATURA = SignatureAlgorithm.HS256;
 	public static final int HORAS_EXPIRACAO_TOKEN = 1;
 
-	public Map<String, Object> gerarPayload(Usuario usuario){
-		//AQUI VOCÊ PODE COLOCAR O QUE MAIS VAI COMPOR O PAYLOAD DO TOKEN
-		
+	public Map<String, Object> gerarPayload(Usuario usuario) {
+		// AQUI VOCÊ PODE COLOCAR O QUE MAIS VAI COMPOR O PAYLOAD DO TOKEN
+
 		Map<String, Object> payloadData = new HashMap<>();
 		payloadData.put("username", usuario.getUsername());
 		payloadData.put("id", usuario.getId().toString());
 		payloadData.put("role", usuario.getRole());
 		payloadData.put("Nome", usuario.getNome());
-		
+
 		return payloadData;
 	}
 
 	///////////////////////////////////////////////////////
 
-	
-	
-	
-	
 	public String generateToken(Usuario usuario) {
 
 		Map<String, Object> payloadData = this.gerarPayload(usuario);
@@ -54,8 +50,8 @@ public class JwtServiceGenerator {
 				.setClaims(payloadData)
 				.setSubject(usuario.getUsername())
 				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(new Date().getTime() + 3600000 * this.HORAS_EXPIRACAO_TOKEN))
-				.signWith(getSigningKey(), this.ALGORITMO_ASSINATURA)
+				.setExpiration(new Date(new Date().getTime() + 3600000 * JwtServiceGenerator.HORAS_EXPIRACAO_TOKEN))
+				.signWith(getSigningKey(), JwtServiceGenerator.ALGORITMO_ASSINATURA)
 				.compact();
 	}
 
@@ -67,7 +63,6 @@ public class JwtServiceGenerator {
 				.parseClaimsJws(token)
 				.getBody();
 	}
-
 
 	public boolean isTokenValid(String token, UserDetails userDetails) {
 		final String username = extractUsername(token);
@@ -83,13 +78,12 @@ public class JwtServiceGenerator {
 	}
 
 	private Key getSigningKey() {
-		byte[] keyBytes = Decoders.BASE64.decode(this.SECRET_KEY);
+		byte[] keyBytes = Decoders.BASE64.decode(JwtServiceGenerator.SECRET_KEY);
 		return Keys.hmacShaKeyFor(keyBytes);
 	}
 
-
 	public String extractUsername(String token) {
-		return extractClaim(token,Claims::getSubject);
+		return extractClaim(token, Claims::getSubject);
 	}
 
 	public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {

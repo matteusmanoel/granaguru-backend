@@ -20,8 +20,6 @@ public class LoginService {
 	@Autowired
 	private AuthenticationManager authenticationManager;
 
-
-	
 	public String logar(Login login) {
 
 		String token = this.gerarToken(login);
@@ -29,15 +27,11 @@ public class LoginService {
 
 	}
 
-
-
 	public String gerarToken(Login login) {
 		authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(
 						login.getUsername(),
-						login.getPassword()
-						)
-				);
+						login.getPassword()));
 		Usuario user = repository.findByEmail(login.getUsername()).get();
 		String jwtToken = jwtService.generateToken(user);
 		return jwtToken;
