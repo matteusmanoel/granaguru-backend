@@ -21,7 +21,7 @@ public class ContaController {
 	/**
 	 * Retorna todas as contas cadastradas.
 	 */
-	@PreAuthorize("hasRole('USER')")
+	
 	@GetMapping
 	public List<Conta> findAll() {
 		return contaService.findAll();
@@ -30,7 +30,7 @@ public class ContaController {
 	/**
 	 * Busca uma conta pelo ID.
 	 */
-	@PreAuthorize("hasRole('USER')")
+
 	@GetMapping("/{id}")
 	public ResponseEntity<Conta> findById(@PathVariable Long id) {
 		Conta conta = contaService.findById(id);
@@ -40,7 +40,7 @@ public class ContaController {
 	/**
 	 * Retorna as contas de um usuário específico pelo ID do usuário.
 	 */
-	@PreAuthorize("hasRole('USER')")
+	
 	@GetMapping("/usuario/{usuarioId}")
 	public List<Conta> findByUsuarioId(@PathVariable Long usuarioId) {
 		return contaService.findByUsuarioId(usuarioId);
