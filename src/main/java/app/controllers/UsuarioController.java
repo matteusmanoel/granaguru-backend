@@ -37,28 +37,29 @@ public class UsuarioController {
 		return usuarioService.listAll();
 	}
 
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@GetMapping("/{id}")
 	public ResponseEntity<Usuario> findById(@PathVariable Long id) {
 		Usuario usuario = usuarioService.findById(id);
 		return ResponseEntity.ok(usuario);
 	}
 
-	@PreAuthorize("hasRole('ADMIN')")
+	
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@GetMapping("/buscar-por-nome")
 	public ResponseEntity<List<Usuario>> findByNome(@RequestParam String nome) {
 		List<Usuario> usuarios = usuarioService.findByNome(nome);
 		return ResponseEntity.ok(usuarios);
 	}
 
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@GetMapping("/buscar-por-status")
 	public ResponseEntity<List<Usuario>> findByStatus(@RequestParam StatusUsuario status) {
 		List<Usuario> usuarios = usuarioService.findByStatus(status);
 		return ResponseEntity.ok(usuarios);
 	}
 
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@GetMapping("/buscar-por-email")
 	public ResponseEntity<Usuario> findByEmail(@RequestParam String email) {
 		Usuario usuario = usuarioService.findByEmail(email);

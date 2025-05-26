@@ -3,6 +3,7 @@ package app.controllers;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import app.entities.Tag;
@@ -20,6 +21,7 @@ public class TagController {
     /**
      * Lista todas as tags
      */
+    @PreAuthorize("hasAuthority('USER')")
     @GetMapping
     public List<Tag> findAll() {
         return tagService.findAll();
@@ -28,6 +30,7 @@ public class TagController {
     /**
      * Busca tag por ID. Retorna 404 se não existir.
      */
+    @PreAuthorize("hasAuthority('USER')")
     @GetMapping("/{id}")
     public ResponseEntity<Tag> findById(@PathVariable Long id) {
         Tag tag = tagService.findById(id); // lança TagNotFoundException se não existir
