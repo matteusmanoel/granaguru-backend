@@ -31,7 +31,7 @@ public class UsuarioController {
 	@Autowired
 	private UsuarioService usuarioService;
 
-	@PreAuthorize("hasAuthority('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping
 	public List<Usuario> listAll() {
 		return usuarioService.listAll();
@@ -43,7 +43,7 @@ public class UsuarioController {
 		Usuario usuario = usuarioService.findById(id);
 		return ResponseEntity.ok(usuario);
 	}
-	
+
 	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/buscar-por-nome")
 	public ResponseEntity<List<Usuario>> findByNome(@RequestParam String nome) {

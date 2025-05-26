@@ -60,15 +60,11 @@ public class Usuario implements UserDetails {
 	@NotBlank(message = "A senha do usuário não pode estar em branco.")
 	@Size(min = 6, message = "A senha do usuário deve ter pelo menos 6 caracteres.")
 	private String senha;
-	
+
 	@Enumerated(EnumType.STRING)
-	@Column(
-	    name = "role",
-	    columnDefinition = "ENUM('ADMIN','USER')"
-	)
+	@Column(name = "role", columnDefinition = "ENUM('ADMIN','USER')")
 	@NotNull(message = "O papel (role) do usuário é obrigatório.")
 	private Role role;
-
 
 	@Builder.Default
 	@Column(name = "data_criacao", nullable = false, updatable = false)
@@ -83,15 +79,13 @@ public class Usuario implements UserDetails {
 	@JsonIgnoreProperties({ "usuario" }) // Evita referência cíclica ao serializar metas
 	private List<Meta> metas;
 
-
 	@Override
 	@JsonIgnore
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-	    List<GrantedAuthority> authorities = new ArrayList<>();
-	    authorities.add(new SimpleGrantedAuthority(this.role.name())); // usa o nome do enum
-	    return authorities;
+		List<GrantedAuthority> authorities = new ArrayList<>();
+		authorities.add(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
+		return authorities;
 	}
-
 
 	@Override
 	public String getPassword() {
