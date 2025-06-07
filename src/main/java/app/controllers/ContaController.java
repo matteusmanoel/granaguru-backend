@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import app.entities.Conta;
@@ -21,7 +20,7 @@ public class ContaController {
 	/**
 	 * Retorna todas as contas cadastradas.
 	 */
-	
+
 	@GetMapping
 	public List<Conta> findAll() {
 		return contaService.findAll();
@@ -40,7 +39,7 @@ public class ContaController {
 	/**
 	 * Retorna as contas de um usuário específico pelo ID do usuário.
 	 */
-	
+
 	@GetMapping("/usuario/{usuarioId}")
 	public List<Conta> findByUsuarioId(@PathVariable Long usuarioId) {
 		return contaService.findByUsuarioId(usuarioId);

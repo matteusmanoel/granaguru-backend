@@ -31,19 +31,19 @@ public class UsuarioController {
 	@Autowired
 	private UsuarioService usuarioService;
 
-	@PreAuthorize("hasRole('ADMIN')")
+//	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping
 	public List<Usuario> listAll() {
 		return usuarioService.listAll();
 	}
 
 	@PreAuthorize("hasAuthority('ADMIN')")
+
 	@GetMapping("/{id}")
 	public ResponseEntity<Usuario> findById(@PathVariable Long id) {
 		Usuario usuario = usuarioService.findById(id);
 		return ResponseEntity.ok(usuario);
 	}
-
 	
 	@PreAuthorize("hasAuthority('ADMIN')")
 	@GetMapping("/buscar-por-nome")
@@ -53,6 +53,7 @@ public class UsuarioController {
 	}
 
 	@PreAuthorize("hasAuthority('ADMIN')")
+
 	@GetMapping("/buscar-por-status")
 	public ResponseEntity<List<Usuario>> findByStatus(@RequestParam StatusUsuario status) {
 		List<Usuario> usuarios = usuarioService.findByStatus(status);
@@ -60,6 +61,7 @@ public class UsuarioController {
 	}
 
 	@PreAuthorize("hasAuthority('ADMIN')")
+
 	@GetMapping("/buscar-por-email")
 	public ResponseEntity<Usuario> findByEmail(@RequestParam String email) {
 		Usuario usuario = usuarioService.findByEmail(email);
