@@ -11,7 +11,7 @@ import app.services.ContaService;
 
 @RestController
 @RequestMapping("/contas")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 public class ContaController {
 
 	@Autowired

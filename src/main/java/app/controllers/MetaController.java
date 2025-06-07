@@ -12,7 +12,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/metas")
-@CrossOrigin(origins = "http://localhost:4200") 
+@CrossOrigin(origins = "*") 
 public class MetaController {
 
     @Autowired

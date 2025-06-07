@@ -11,7 +11,7 @@ import app.services.NotificacaoService;
 
 @RestController
 @RequestMapping("/notificacoes")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 public class NotificacaoController {
 
 	@Autowired

@@ -10,7 +10,7 @@ import app.services.OrcamentoService;
 
 @RestController
 @RequestMapping("/orcamentos")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 public class OrcamentoController {
 
 	@Autowired
