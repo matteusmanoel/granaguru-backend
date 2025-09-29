@@ -10,7 +10,7 @@ import app.entities.Conta;
 import app.services.ContaService;
 
 @RestController
-@RequestMapping("/contas")
+@RequestMapping("/api/contas")
 @CrossOrigin(origins = "*")
 public class ContaController {
 

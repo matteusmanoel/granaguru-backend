@@ -71,9 +71,38 @@ public class SecurityConfig {
             DaoAuthenticationProvider authenticationProvider) throws Exception {
 
         http.csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.disable())
+            .cors(cors -> cors.configurationSource(request -> {
+                CorsConfiguration config = new CorsConfiguration();
+                config.setAllowCredentials(true);
+                config.setAllowedOriginPatterns(Arrays.asList(
+                    "http://granaguru.local",
+                    "https://granaguru.local",
+                    "http://www.granaguru.local",
+                    "https://www.granaguru.local",
+                    "http://192.168.56.10",
+                    "http://frontend",
+                    "http://api.granaguru.local:8080"
+                ));
+                config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
+                config.setAllowedHeaders(Arrays.asList(
+                    HttpHeaders.AUTHORIZATION,
+                    HttpHeaders.CONTENT_TYPE,
+                    HttpHeaders.ACCEPT,
+                    HttpHeaders.ORIGIN,
+                    HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD,
+                    HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS,
+                    "X-Requested-With"
+                ));
+                config.setExposedHeaders(Arrays.asList(
+                    HttpHeaders.AUTHORIZATION,
+                    HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
+                    HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS
+                ));
+                return config;
+            }))
             .authorizeHttpRequests(req -> req
-                    .requestMatchers("/api/login", "/api/register").permitAll()
+                    .requestMatchers("/api/login", "/api/register", "/health").permitAll()
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .anyRequest().authenticated())
             .authenticationProvider(authenticationProvider)
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
@@ -89,17 +118,41 @@ public class SecurityConfig {
     public FilterRegistrationBean<CorsFilter> corsFilter() {
         CorsConfiguration cfg = new CorsConfiguration();
         cfg.setAllowCredentials(true);
-        cfg.setAllowedOriginPatterns(Arrays.asList("*"));
+        
+        // Configuração específica para ambiente de produção
+        cfg.setAllowedOriginPatterns(Arrays.asList(
+                "http://frontend*",        // Frontend VM (vm_front)
+                "https://frontend*",       // Frontend VM com HTTPS
+                "http://vm_front*",        // Frontend VM (alternativo)
+                "https://vm_front*",       // Frontend VM com HTTPS (alternativo)
+                "http://localhost:*",      // Desenvolvimento local
+                "https://localhost:*"      // Desenvolvimento local com HTTPS
+        ));
+        
         cfg.setAllowedHeaders(Arrays.asList(
                 HttpHeaders.AUTHORIZATION,
                 HttpHeaders.CONTENT_TYPE,
-                HttpHeaders.ACCEPT));
+                HttpHeaders.ACCEPT,
+                HttpHeaders.ORIGIN,
+                HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD,
+                HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS
+        ));
+        
         cfg.setAllowedMethods(Arrays.asList(
                 HttpMethod.GET.name(),
                 HttpMethod.POST.name(),
                 HttpMethod.PUT.name(),
-                HttpMethod.DELETE.name()));
+                HttpMethod.DELETE.name(),
+                HttpMethod.OPTIONS.name(),
+                HttpMethod.PATCH.name()
+        ));
+        
         cfg.setMaxAge(3600L);
+        cfg.setExposedHeaders(Arrays.asList(
+                HttpHeaders.AUTHORIZATION,
+                HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
+                HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS
+        ));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", cfg);

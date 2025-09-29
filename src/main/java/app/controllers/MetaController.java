@@ -11,7 +11,7 @@ import app.services.MetaService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/metas")
+@RequestMapping("/api/metas")
 @CrossOrigin(origins = "*") 
 public class MetaController {
 

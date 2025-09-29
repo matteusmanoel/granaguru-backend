@@ -10,7 +10,7 @@ import app.entities.Categoria;
 import app.services.CategoriaService;
 
 @RestController
-@RequestMapping("/categorias")
+@RequestMapping("/api/categorias")
 @CrossOrigin(origins = "*")
 public class CategoriaController {
 

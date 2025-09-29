@@ -13,7 +13,7 @@ import app.services.TransacaoService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/transacoes")
+@RequestMapping("/api/transacoes")
 @CrossOrigin(origins = "*")
 public class TransacaoController {
 

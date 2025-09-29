@@ -23,7 +23,7 @@ import app.services.UsuarioService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/usuarios")
+@RequestMapping("/api/usuarios")
 @Validated
 @CrossOrigin(origins = "*")
 public class UsuarioController {

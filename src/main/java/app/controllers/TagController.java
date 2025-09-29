@@ -20,7 +20,7 @@ import app.services.TagService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/tags")
+@RequestMapping("/api/tags")
 @CrossOrigin(origins = "*")
 public class TagController {
 
@@ -30,7 +30,7 @@ public class TagController {
     /**
      * Lista todas as tags
      */
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @GetMapping
     public List<Tag> findAll() {
         return tagService.findAll();
@@ -39,7 +39,7 @@ public class TagController {
     /**
      * Busca tag por ID. Retorna 404 se não existir.
      */
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<Tag> findById(@PathVariable Long id) {
         Tag tag = tagService.findById(id); // lança TagNotFoundException se não existir

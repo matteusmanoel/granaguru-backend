@@ -9,7 +9,7 @@ import app.entities.Orcamento;
 import app.services.OrcamentoService;
 
 @RestController
-@RequestMapping("/orcamentos")
+@RequestMapping("/api/orcamentos")
 @CrossOrigin(origins = "*")
 public class OrcamentoController {
 
